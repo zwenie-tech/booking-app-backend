@@ -1,10 +1,23 @@
 import { User } from "../../../../domain/entities/user.entitiy";
 import { UserRepository } from "../../../../domain/repositories/user-repository.interface";
 import { PrismaClient } from "@prisma/client";
+import { logger } from "../../../logger";
 
 export class PrismaUserRepository implements UserRepository {
   constructor(private prisma: PrismaClient) {}
   async create(user: User): Promise<User | null> {
+    const existingUser = await this.prisma.user.findFirst({
+      where : {
+        OR : [
+          {email: user.email},
+          {phone: user.phone}
+        ]
+      }
+    })
+    if(existingUser) {
+      return null
+    }
+    
     const result = await this.prisma.user.create({
       data: {
         firstName: user.firstName,
@@ -15,6 +28,7 @@ export class PrismaUserRepository implements UserRepository {
         profile: user.profile,
       },
     });
+    
     return new User(
       result.id,
       result.firstName,
