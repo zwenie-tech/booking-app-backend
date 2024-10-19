@@ -1,6 +1,6 @@
 import express, { Application } from "express";
 import { DiContainer } from "./di-container";
-import { middleware } from "../infrastructure/web/middlewares";
+import { middleware } from "../infrastructure/web/middlewares/error-handle";
 
 export class App {
   private app: Application;
@@ -18,8 +18,9 @@ export class App {
     this.app.use(express.json());
   }
 
+  // configure routes here
   private configureRoutes(): void {
-    this.app.use('/users', this.diContainer.getUserRoutes().getRouter())
+    this.app.use('/user', this.diContainer.getUserRoutes().getRouter());
   }
 
   private configureErrorHandling() : void {

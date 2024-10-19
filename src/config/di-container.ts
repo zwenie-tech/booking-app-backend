@@ -12,13 +12,16 @@ export class DiContainer {
         const prisma = new PrismaClient();
         const userRepository = new PrismaUserRepository(prisma);
 
+        // Use cases
         const createUserUseCase = new CreateUserUseCase(userRepository);
         // const getUserUseCase = new GetUserUseCase(userRepository);
         // const updateUserUseCase = new UpdateUserUseCase(userRepository);
         // const deleteUserUseCase = new DeleteUserUseCase(userRepository);
 
+        // Controllers
         const userController = new UserController(createUserUseCase);
 
+        // Routers
         this.userRoutes = new UserRouter(userController);
     }
 
