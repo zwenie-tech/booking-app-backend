@@ -7,5 +7,5 @@ export interface UserRepository {
   delete(id: number): Promise<void>,
   findAll(): Promise<User[] | null>,
   findByUsername(username: string) : Promise<User | null>,
-  findByUnique(username : string, password: string) : Promise<User | null>,
+  findByCredentials(username : string, password: string) : Promise<User | null>,
 }

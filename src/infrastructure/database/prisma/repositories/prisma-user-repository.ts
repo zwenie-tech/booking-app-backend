@@ -71,7 +71,7 @@ export class PrismaUserRepository implements UserRepository {
   async findAll(): Promise<User[] | null> {
     return null;
   }
-  async findByUnique(): Promise<User | null> {
+  async findByCredentials(): Promise<User | null> {
       return new User(
         2,
         "Alice",

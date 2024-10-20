@@ -8,8 +8,8 @@ export class GetUserUseCase {
     return this.userRepository.findById(id);
   }
 
-  async findByUnique(username: string, password: string): Promise<User | null> {
-    return this.userRepository.findByUnique(username, password);
+  async findByCredentials(username: string, password: string): Promise<User | null> {
+    return this.userRepository.findByCredentials(username, password);
   }
 
   async findByUsername(username: string): Promise<User | null> {
