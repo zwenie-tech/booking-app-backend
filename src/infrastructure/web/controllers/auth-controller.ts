@@ -17,7 +17,7 @@ export class AuthController {
   ): Promise<void> {
     const { username, password } = req.body;
     try {
-      const user = await this.getUserUseCase.findByUnique(username, password);
+      const user = await this.getUserUseCase.findByCredentials(username, password);
       if (user) {
         res.status(200).json({
           message: "You have successfully logged in.",
