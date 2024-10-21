@@ -14,14 +14,22 @@ datasource db {
 }
 
 model User {
-  id          Int       @id  @default(autoincrement())
-  firstName   String
-  lastName    String?
-  email       String    @unique
-  phone       String    @unique
-  profile     String?
-  password    String
-  isDeleted   Boolean   @default(false)
-  deletedDate DateTime?
-  createAt    DateTime  @default(now())
+  id            Int             @id  @default(autoincrement())
+  firstName     String
+  lastName      String?
+  email         String          @unique
+  phone         String          @unique
+  profile       String?
+  password      String
+  isDeleted     Boolean         @default(false)
+  deletedDate   DateTime?
+  createAt      DateTime        @default(now())
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
 }
