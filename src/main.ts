@@ -1,5 +1,5 @@
 import { App } from "./config/app-config";
-import { logger } from "./infrastructure/logger";
+import { logger } from "./shared/utils/logger";
 
 class Server {
   private app: App;

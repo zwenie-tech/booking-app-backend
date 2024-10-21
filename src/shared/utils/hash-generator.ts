@@ -1,5 +1,5 @@
 import { genSalt, hash, compare } from "bcrypt";
-import { logger } from "../../infrastructure/logger";
+import { logger } from "./logger";
 
 export class Util {
   private saltRound: number;
@@ -11,7 +11,6 @@ export class Util {
       const salt = await genSalt(this.saltRound);
       const hashedPassword = await hash(password, salt);
       return hashedPassword;
-
     } catch (err: any) {
       logger.error(`Something went wrong ${err.message}`);
       return null;
@@ -22,7 +21,6 @@ export class Util {
     try {
       const isMatch = await compare(password, hash);
       return isMatch;
-
     } catch (err: any) {
       logger.error(`Something went wrong ${err.message}`);
       return null;
