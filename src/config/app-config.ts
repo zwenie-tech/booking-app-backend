@@ -1,6 +1,6 @@
 import express, { Application } from "express";
 import { DiContainer } from "./di-container";
-import { middleware } from "../infrastructure/web/middlewares/error-handle";
+import { middleware } from "../infrastructure/web/v1/middlewares/error-handle";
 
 export class App {
   private app: Application;

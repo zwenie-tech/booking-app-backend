@@ -1,5 +1,5 @@
 import { genSalt, hash, compare } from "bcrypt";
-import { logger } from "../infrastructure/logger";
+import { logger } from "../../infrastructure/logger";
 
 export class Util {
   private saltRound: number;

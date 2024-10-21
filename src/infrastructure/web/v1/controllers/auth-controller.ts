@@ -5,7 +5,7 @@
 //     [x] forgot password
 
 import { NextFunction, Request, Response } from "express";
-import { GetUserUseCase } from "../../../application/use-cases/user/get-user";
+import { GetUserUseCase } from "../../../../application/use-cases/user/get-user";
 
 export class AuthController {
   constructor(private getUserUseCase: GetUserUseCase) {}
@@ -17,7 +17,10 @@ export class AuthController {
   ): Promise<void> {
     const { username, password } = req.body;
     try {
-      const user = await this.getUserUseCase.findByCredentials(username, password);
+      const user = await this.getUserUseCase.findByCredentials(
+        username,
+        password
+      );
       if (user) {
         res.status(200).json({
           message: "You have successfully logged in.",
