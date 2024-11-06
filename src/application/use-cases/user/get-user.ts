@@ -8,7 +8,10 @@ export class GetUserUseCase {
     return this.userRepository.findById(id);
   }
 
-  async findByCredentials(username: string, password: string): Promise<User | null> {
+  async findByCredentials(
+    username: string,
+    password: string
+  ): Promise<User | null> {
     return this.userRepository.findByCredentials(username, password);
   }
 

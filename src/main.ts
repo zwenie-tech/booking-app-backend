@@ -1,11 +1,12 @@
 import { App } from "./config/app-config";
+import { config } from "./shared/utils/constants/app-constants";
 import { logger } from "./shared/utils/logger";
 
 class Server {
   private app: App;
   private port: number;
 
-  constructor(port: number = 3000) {
+  constructor(port: number = config.port) {
     this.app = new App();
     this.port = port;
   }

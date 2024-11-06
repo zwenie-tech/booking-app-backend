@@ -1,10 +1,11 @@
 import { genSalt, hash, compare } from "bcrypt";
 import { logger } from "./logger";
+import { config } from "./constants/app-constants";
 
 export class Util {
   private saltRound: number;
   constructor() {
-    this.saltRound = 10;
+    this.saltRound = config.saltRound;
   }
   async hashPassword(password: string): Promise<string | null> {
     try {
