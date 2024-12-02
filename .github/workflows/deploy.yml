@@ -39,4 +39,16 @@ jobs:
           sudo docker pull binshadcs/booking-app-api:latest
           sudo docker stop web-app || true
           sudo docker rm web-app || true
-          sudo docker run -d --name web-app -p 3000:3000 binshadcs/booking-app-api:latest
+          sudo docker run -d --restart always --name web-app \
+            -e DB_URL=${{ secrets.DB_URL }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            -e PORT=${{secrets.PORT}} \
+            -e DATABASE_URL=${{secrets.DATABASE_URL}} \
+            -e NODE_ENV=${{secrets.development}} \
+            -e ACCESS_TOKEN_SECRET=${{secrets.ACCESS_TOKEN_SECRET}} \
+            -e REFRESH_TOKEN_SECRET=${{secrets.REFRESH_TOKEN_SECRET}} \
+            -e BUCKET_NAME=${{secrets.BUCKET_NAME}} \
+            -e BUCKET_REGION=${{secrets.BUCKET_REGION}} \
+            -e ACCESS_KEY=${{secrets.ACCESS_KEY}} \
+            -e SECRET_ACCESS_KEY=${{secrets.SECRET_ACCESS_KEY}} \
+            -p 3000:3000 binshadcs/booking-app-api:latest
