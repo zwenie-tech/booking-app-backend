@@ -24,7 +24,7 @@ export class App {
 
   // configure routes here
   private configureRoutes(): void {
-    this.app.use("/user", this.diContainer.getUserRoutes().getRouter());
+    this.app.use("/api/v1/user", this.diContainer.getUserRoutes().getRouter());
   }
 
   private configureErrorHandling(): void {
