@@ -24,12 +24,39 @@ model User {
   isDeleted     Boolean         @default(false)
   deletedDate   DateTime?
   createAt      DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   refreshTokens RefreshToken[]
 }
 
 model RefreshToken {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  id            Int             @id @default(autoincrement())
+  token         String          @unique
+  userId        Int
+  createdAt     DateTime        @default(now())
+  user          User            @relation(fields: [userId], references: [id])
+}
+
+model Host {
+  id            Int             @id @default(autoincrement())
+  firstName     String
+  lastName      String?
+  email         String          @unique
+  phone         String          @unique
+  profile       String?
+  org_id        Int?
+  role          String          @default("admin")
+  isDeleted     Boolean         @default(false)
+  deletedDate   DateTime?
+  password      String
+  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime        @default(now())
+  refreshTokens RefreshTokenHost[]
+}
+
+model RefreshTokenHost {
+  id            Int             @id @default(autoincrement())
+  token         String          @unique
+  hostId        Int
+  createdAt     DateTime        @default(now())
+  host          Host            @relation(fields: [hostId], references: [id])
 }
