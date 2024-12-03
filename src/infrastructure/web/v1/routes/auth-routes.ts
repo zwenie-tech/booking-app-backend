@@ -1,10 +1,3 @@
-// Todo
-
-// 1. Login
-// 2. logout
-// 3. refresh
-// 4. forgot password
-
 import { Router } from "express";
 import { AuthController } from "../controllers/auth-controller";
 
@@ -16,8 +9,11 @@ export class AuthRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.post("/login", (req, res, next) =>
+    this.router.post("/login/user", (req, res, next) =>
       this.authController.loginUser(req, res, next)
+    );
+    this.router.post("/register/user", (req, res, next) => 
+      this.authController.createUser(req, res, next)
     );
   }
 

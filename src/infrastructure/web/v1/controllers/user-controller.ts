@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { CreateUserUseCase } from "../../../../application/use-cases/user/create-user";
-import { UserRegisterValidate } from "../../../validators/user-schema";
 import { ZodError } from "zod";
+import { UserRegisterValidate } from "../../../validators/auth-schema";
 
 export class UserController {
   constructor(private createUserUseCase: CreateUserUseCase) {}
 
-  async createUser(
+  async getUser(
     req: Request,
     res: Response,
     next: NextFunction
@@ -14,29 +14,9 @@ export class UserController {
     const { firstName, lastName, email, phone, password } = req.body;
     const result = UserRegisterValidate.safeParse({firstName, lastName, email, phone});
     if(result.success) {
-      try {
-        const user = await this.createUserUseCase.execute(
-          firstName,
-          lastName,
-          email,
-          phone,
-          password
-        );
-        if (user) {
-          res.status(201).json({
-            success: true,
-            data: user,
-          });
-        } else {
-          res.status(409).json({
-            success: false,
-            message: "User already exist with email or phone number",
-          });
-        }
-      } catch (error: any) {
-        res.status(400);
-        next(error);
-      }
+     res.status(400).json({
+      message : "This is test end point, don't be an idiot!!"
+     }) 
     } else {
       if(result.error instanceof ZodError) {
         const formattedErrors = result.error.errors.map((e) => ({
