@@ -14,6 +14,8 @@ export class DiContainer {
 
   private constructor() {
     const prisma = new PrismaClient();
+
+    // Repositories
     const userRepository = new PrismaUserRepository(prisma);
 
     // Use cases
@@ -24,7 +26,10 @@ export class DiContainer {
 
     // Controllers
     const userController = new UserController(createUserUseCase);
-    const authController = new AuthController(getUserUseCase, createUserUseCase)
+    const authController = new AuthController(
+      getUserUseCase,
+      createUserUseCase
+    );
 
     // Routers
     this.userRoutes = new UserRouter(userController);

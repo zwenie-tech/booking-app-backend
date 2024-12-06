@@ -1,7 +1,7 @@
 export class Host {
     constructor(
       public readonly id: number,
-      public readonly firstName: string,
+      public readonly firstName : string,
       public readonly lastName: string | null,
       public readonly email: string,
       public readonly phone: string,

@@ -12,9 +12,15 @@ export class AuthRouter {
     this.router.post("/login/user", (req, res, next) =>
       this.authController.loginUser(req, res, next)
     );
-    this.router.post("/register/user", (req, res, next) => 
+    this.router.post("/register/user", (req, res, next) =>
       this.authController.createUser(req, res, next)
     );
+    this.router.post("/login/host", (req, res, next) =>
+      this.authController.loginHost(req, res, next)
+    );
+    this.router.post("/register/host", (req, res, next) => 
+      this.authController.createHost(req, res, next)
+    )
   }
 
   public getRouter(): Router {
