@@ -45,20 +45,29 @@ export class PrismaHostRepository implements HostRepository {
     }
   }
   async findById(id: number): Promise<Host | null> {
-    return new Host(
-      2,
-      "Alice",
-      "Smith",
-      "alice.smith@example.com",
-      "1234567890",
-      "https://example.com/profiles/alice.jpg",
-      1,
-      "",
-      false,
-      null,
-      "",
-      new Date("2024-01-15T08:00:00Z")
-    );
+    const result = await this.prisma.host.findFirst({
+      where: {
+        id,
+      },
+    });
+    if (result) {
+      return new Host(
+        result.id,
+        result.firstName,
+        result.lastName,
+        result.email,
+        result.phone,
+        result.profile,
+        result.org_id!,
+        result.role,
+        result.isDeleted,
+        result.deletedDate,
+        result.password,
+        result.createdAt
+      );
+    } else {
+      return result;
+    }
   }
   async update(id: number, HostData: Partial<Host>): Promise<Host | null> {
     return new Host(
