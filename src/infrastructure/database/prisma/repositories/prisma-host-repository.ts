@@ -91,6 +91,16 @@ export class PrismaHostRepository implements HostRepository {
     return null;
   }
   async findByCredentials(): Promise<Host | null> {
+    /* 
+    const isEmail = username.includes('@')
+    
+    // Find user by either email or phone
+    const user = await prisma.user.findFirst({
+      where: isEmail 
+        ? { email: username }
+        : { phone: username }
+    })
+    */
     return new Host(
       2,
       "Alice",

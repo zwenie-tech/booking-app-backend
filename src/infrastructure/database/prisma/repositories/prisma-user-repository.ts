@@ -82,6 +82,16 @@ export class PrismaUserRepository implements UserRepository {
     return null;
   }
   async findByCredentials(): Promise<User | null> {
+     /* 
+    const isEmail = username.includes('@')
+    
+    // Find user by either email or phone
+    const user = await prisma.user.findFirst({
+      where: isEmail 
+        ? { email: username }
+        : { phone: username }
+    })
+    */
     return new User(
       2,
       "Alice",

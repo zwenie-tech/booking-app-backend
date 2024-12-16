@@ -1,69 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { GetUserUseCase } from "../../../../application/use-cases/user/get-user";
-import {
-  LoginValidate,
-  UserRegisterValidate,
-} from "../../../validators/auth-schema";
-import { CreateUserUseCase } from "../../../../application/use-cases/user/create-user";
+import { LoginValidate } from "../../../validators/auth-schema";
 import { util } from "../../../../shared/utils/common";
 
 export class AuthController {
   constructor(
-    private getUserUseCase: GetUserUseCase,
-    private createUserUseCase: CreateUserUseCase
+    private getUserUseCase: GetUserUseCase
   ) {}
-  async createUser(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    const { firstName, lastName, email, phone, password } = req.body;
-    const result = UserRegisterValidate.safeParse({
-      firstName,
-      lastName,
-      email,
-      phone,
-      password,
-    });
-    const hashedPassword = await util.hashPassword(password);
-    if (result.success) {
-      if (hashedPassword)
-        try {
-          const user = await this.createUserUseCase.execute(
-            firstName,
-            lastName,
-            email,
-            phone,
-            hashedPassword
-          );
-          if (user) {
-            res.status(201).json({
-              success: true,
-              data: {
-                userId: user.id,
-                accessToken: "",
-                refreshToken: "",
-              },
-            });
-          } else {
-            res.status(409).json({
-              success: false,
-              message: "User already exist with email or phone number",
-            });
-          }
-        } catch (error: any) {
-          res.status(400);
-          next(error);
-        }
-    } else {
-      const formattedErrors = util.handleValidationError(result.error);
-      res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: formattedErrors,
-      });
-    }
-  }
 
   async loginUser(
     req: Request,
@@ -110,58 +53,17 @@ export class AuthController {
     }
   }
 
-  async createHost(
+  async userRefreshToken(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {
-    const { firstName, lastName, email, phone, password } = req.body;
-    const result = UserRegisterValidate.safeParse({
-      firstName,
-      lastName,
-      email,
-      phone,
-      password,
-    });
-    const hashedPassword = await util.hashPassword(password);
-    if (result.success) {
-      if (hashedPassword)
-        try {
-          const user = await this.createUserUseCase.execute(
-            firstName,
-            lastName,
-            email,
-            phone,
-            hashedPassword
-          );
-          if (user) {
-            res.status(201).json({
-              success: true,
-              data: {
-                userId: user.id,
-                accessToken: "",
-                refreshToken: "",
-              },
-            });
-          } else {
-            res.status(409).json({
-              success: false,
-              message: "User already exist with email or phone number",
-            });
-          }
-        } catch (error: any) {
-          res.status(400);
-          next(error);
-        }
-    } else {
-      const formattedErrors = util.handleValidationError(result.error);
-      res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: formattedErrors,
-      });
-    }
-  }
+  ): Promise<void> {}
+
+  async logoutUser(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {}
 
   async loginHost(
     req: Request,
@@ -207,4 +109,16 @@ export class AuthController {
       });
     }
   }
+
+  async hostRefreshToken(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {}
+
+  async logoutHost(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {}
 }

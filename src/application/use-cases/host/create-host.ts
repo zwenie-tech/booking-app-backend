@@ -1,7 +1,7 @@
 import { Host } from "../../../domain/entities/host.entitiy";
 import { HostRepository } from "../../../domain/repositories/host-repository.interface";
 
-export class CreateUserUseCase {
+export class CreateHostUseCase {
   constructor(private hostRepository: HostRepository) {}
   async execute(
     firstName: string,
