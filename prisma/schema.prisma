@@ -33,6 +33,7 @@ model RefreshToken {
   token         String          @unique
   userId        Int
   createdAt     DateTime        @default(now())
+  expiresAt     DateTime
   user          User            @relation(fields: [userId], references: [id])
 }
 
@@ -58,5 +59,6 @@ model RefreshTokenHost {
   token         String          @unique
   hostId        Int
   createdAt     DateTime        @default(now())
+  expiresAt     DateTime
   host          Host            @relation(fields: [hostId], references: [id])
 }
