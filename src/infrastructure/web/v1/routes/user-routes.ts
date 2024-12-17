@@ -12,6 +12,9 @@ export class UserRouter {
     this.router.post("/register", (req, res, next) =>
       this.userController.createUser(req, res, next)
     );
+    this.router.post("/:id", (req, res, next) =>
+      this.userController.getUser(req, res, next)
+    );
   }
 
   public getRouter(): Router {

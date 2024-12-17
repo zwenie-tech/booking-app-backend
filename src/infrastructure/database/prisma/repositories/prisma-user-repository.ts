@@ -39,18 +39,28 @@ export class PrismaUserRepository implements UserRepository {
     );
   }
   async findById(id: number): Promise<User | null> {
-    return new User(
-      1,
-      "Alice",
-      "Smith",
-      "alice.smith@example.com",
-      "1234567890",
-      "https://example.com/profiles/alice.jpg",
-      false,
-      null,
-      "password123",
-      new Date("2024-01-15T08:00:00Z")
-    );
+    const result = await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (result) {
+      return new User(
+        result.id,
+        result.firstName,
+        result.lastName,
+        result.email,
+        result.phone,
+        result.profile,
+        result.isDeleted,
+        result.deletedDate,
+        result.password,
+        result.createAt
+      );
+    } else {
+      return result;
+    }
   }
   async update(id: number, userData: Partial<User>): Promise<User | null> {
     return new User(
@@ -71,22 +81,58 @@ export class PrismaUserRepository implements UserRepository {
   async findAll(): Promise<User[] | null> {
     return null;
   }
-  async findByCredentials(): Promise<User | null> {
-      return new User(
-        2,
-        "Alice",
-        "Smith",
-        "alice.smith@example.com",
-        "1234567890",
-        "https://example.com/profiles/alice.jpg",
-        false,
-        null,
-        "password123",
-        new Date("2024-01-15T08:00:00Z")
-      );
+  async findByCredentials(
+    username: string,
+    password: string
+  ): Promise<User | null> {
+    const result = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: username }, { phone: username }],
+      },
+    });
+    if (result) {
+      if (result.password === password) {
+        return new User(
+          result.id,
+          result.firstName,
+          result.lastName,
+          result.email,
+          result.phone,
+          result.profile,
+          result.isDeleted,
+          result.deletedDate,
+          result.password,
+          result.createAt
+        );
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 
   async findByUsername(username: string): Promise<User | null> {
-      return null
+    const result = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: username }, { phone: username }],
+      },
+    });
+    if (result) {
+      return new User(
+        result.id,
+        result.firstName,
+        result.lastName,
+        result.email,
+        result.phone,
+        result.profile,
+        result.isDeleted,
+        result.deletedDate,
+        result.password,
+        result.createAt
+      );
+    } else {
+      return result;
+    }
   }
 }
