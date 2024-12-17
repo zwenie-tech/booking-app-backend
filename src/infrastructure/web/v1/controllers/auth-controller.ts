@@ -2,10 +2,24 @@ import { NextFunction, Request, Response } from "express";
 import { GetUserUseCase } from "../../../../application/use-cases/user/get-user";
 import { LoginValidate } from "../../../validators/auth-schema";
 import { util } from "../../../../shared/utils/common";
+import { GetHostUseCase } from "../../../../application/use-cases/host/get-host";
+import { HostLoginUseCase } from "../../../../application/use-cases/auth/host/host-login";
+import { HostLogoutUseCase } from "../../../../application/use-cases/auth/host/host-logout";
+import { HostRefreshTokenUseCase } from "../../../../application/use-cases/auth/host/host-refresh-token";
+import { UserLoginUseCase } from "../../../../application/use-cases/auth/user/user-login";
+import { UserLogoutUseCase } from "../../../../application/use-cases/auth/user/user-logout";
+import { UserRefreshTokenUseCase } from "../../../../application/use-cases/auth/user/user-refresh-token";
 
 export class AuthController {
   constructor(
-    private getUserUseCase: GetUserUseCase
+    private getUserUseCase: GetUserUseCase,
+    private userLoginUseCase: UserLoginUseCase,
+    private userLogoutUseCase: UserLogoutUseCase,
+    private userRefreshTokenUseCase: UserRefreshTokenUseCase,
+    private getHostUseCase: GetHostUseCase,
+    private hostLoginUseCase: HostLoginUseCase,
+    private hostLogoutUseCase: HostLogoutUseCase,
+    private hostRefreshTokenUseCase: HostRefreshTokenUseCase
   ) {}
 
   async loginUser(
@@ -24,15 +38,21 @@ export class AuthController {
             hashedPassword
           );
           if (user) {
-            res.status(200).json({
-              message: "You have successfully logged in.",
-              success: true,
-              data: {
-                userId: user.id,
-                accessToken: "",
-                refreshToken: "",
-              },
-            });
+            try {
+              const token = await this.userLoginUseCase.execute(user.id);
+              res.status(200).json({
+                message: "You have successfully logged in.",
+                success: true,
+                data: {
+                  userId: user.id,
+                  accessToken: token?.accessToken,
+                  refreshToken: token?.refreshToken,
+                },
+              });
+            } catch (err) {
+              res.status(402);
+              next(err);
+            }
           } else {
             res.status(401).json({
               success: false,

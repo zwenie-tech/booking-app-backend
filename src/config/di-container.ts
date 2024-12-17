@@ -12,6 +12,15 @@ import { PrismaUserTokenRepository } from "../infrastructure/database/prisma/rep
 import { CreateHostUseCase } from "../application/use-cases/host/create-host";
 import { HostController } from "../infrastructure/web/v1/controllers/host-controller";
 import { HostRouter } from "../infrastructure/web/v1/routes/host-routes";
+import { GetHostUseCase } from "../application/use-cases/host/get-host";
+import { UserLoginUseCase } from "../application/use-cases/auth/user/user-login";
+import { UserTokenService } from "../infrastructure/services/user-token-service";
+import { HostTokenService } from "../infrastructure/services/host-token-service";
+import { UserLogoutUseCase } from "../application/use-cases/auth/user/user-logout";
+import { UserRefreshTokenUseCase } from "../application/use-cases/auth/user/user-refresh-token";
+import { HostLoginUseCase } from "../application/use-cases/auth/host/host-login";
+import { HostLogoutUseCase } from "../application/use-cases/auth/host/host-logout";
+import { HostRefreshTokenUseCase } from "../application/use-cases/auth/host/host-refresh-token";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -28,15 +37,49 @@ export class DiContainer {
     const hostTokenRepository = new PrismaHostTokenRepository(prisma);
     const userTokenRepository = new PrismaUserTokenRepository(prisma);
 
+    // Service repository
+    const userTokenServiceRepository = new UserTokenService(
+      userTokenRepository
+    );
+    const hostTokenServiceRepository = new HostTokenService(
+      hostTokenRepository
+    );
+
     // Use cases
     const createUserUseCase = new CreateUserUseCase(userRepository);
-    const getUserUseCase = new GetUserUseCase(userRepository);
     const createHostUseCase = new CreateHostUseCase(hostRepository);
+    const getUserUseCase = new GetUserUseCase(userRepository);
+    const userLoginUseCase = new UserLoginUseCase(userTokenServiceRepository);
+    const userLogoutUseCase = new UserLogoutUseCase(userTokenServiceRepository);
+    const userRefreshTokenUseCase = new UserRefreshTokenUseCase(
+      userTokenServiceRepository
+    );
+    const getHostUseCase = new GetHostUseCase(hostRepository);
+    const hostLoginUseCase = new HostLoginUseCase(hostTokenServiceRepository);
+    const hostLogoutUseCase = new HostLogoutUseCase(hostTokenServiceRepository);
+    const hostRefreshTokenUseCase = new HostRefreshTokenUseCase(
+      hostTokenServiceRepository
+    );
 
     // Controllers
-    const userController = new UserController(createUserUseCase);
-    const authController = new AuthController(getUserUseCase);
-    const hostController = new HostController(createHostUseCase);
+    const userController = new UserController(
+      createUserUseCase,
+      userLoginUseCase
+    );
+    const authController = new AuthController(
+      getUserUseCase,
+      userLoginUseCase,
+      userLogoutUseCase,
+      userRefreshTokenUseCase,
+      getHostUseCase,
+      hostLoginUseCase,
+      hostLogoutUseCase,
+      hostRefreshTokenUseCase
+    );
+    const hostController = new HostController(
+      createHostUseCase,
+      hostLoginUseCase
+    );
 
     // Routers
     this.userRoutes = new UserRouter(userController);

@@ -2,9 +2,13 @@ import { CreateHostUseCase } from "../../../../application/use-cases/host/create
 import { util } from "../../../../shared/utils/common";
 import { NextFunction, Request, Response } from "express";
 import { UserRegisterValidate } from "../../../validators/user-schema";
+import { HostLoginUseCase } from "../../../../application/use-cases/auth/host/host-login";
 
 export class HostController {
-  constructor(private createHostUseCase: CreateHostUseCase) {}
+  constructor(
+    private createHostUseCase: CreateHostUseCase,
+    private hostLoginUseCase: HostLoginUseCase
+  ) {}
 
   async createHost(
     req: Request,
@@ -31,14 +35,20 @@ export class HostController {
             hashedPassword
           );
           if (user) {
-            res.status(201).json({
-              success: true,
-              data: {
-                userId: user.id,
-                accessToken: "",
-                refreshToken: "",
-              },
-            });
+            try {
+              const token = await this.hostLoginUseCase.execute(user.id);
+              res.status(201).json({
+                success: true,
+                data: {
+                  userId: user.id,
+                  accessToken: token?.accessToken,
+                  refreshToken: token?.refreshToken,
+                },
+              });
+            } catch (err) {
+              res.status(302);
+              next(err);
+            }
           } else {
             res.status(409).json({
               success: false,

@@ -3,9 +3,10 @@ import { CreateUserUseCase } from "../../../../application/use-cases/user/create
 import { ZodError } from "zod";
 import { util } from "../../../../shared/utils/common";
 import { UserRegisterValidate } from "../../../validators/user-schema";
+import { UserLoginUseCase } from "../../../../application/use-cases/auth/user/user-login";
 
 export class UserController {
-  constructor(private createUserUseCase: CreateUserUseCase) {}
+  constructor(private createUserUseCase: CreateUserUseCase, private userLoginUseCase: UserLoginUseCase) {}
   async createUser(
     req: Request,
     res: Response,
@@ -31,14 +32,22 @@ export class UserController {
             hashedPassword
           );
           if (user) {
-            res.status(201).json({
-              success: true,
-              data: {
-                userId: user.id,
-                accessToken: "",
-                refreshToken: "",
-              },
-            });
+            try{
+              const token = await this.userLoginUseCase.execute(user.id);
+              res.status(201).json({
+                success: true,
+                data: {
+                  userId: user.id,
+                  accessToken: token?.accessToken,
+                  refreshToken: token?.refreshToken,
+                },
+              });
+            } catch(err) {
+              res.status(301);
+              next(err);
+            }
+
+            
           } else {
             res.status(409).json({
               success: false,

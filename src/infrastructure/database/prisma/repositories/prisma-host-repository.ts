@@ -90,31 +90,37 @@ export class PrismaHostRepository implements HostRepository {
   async findAll(): Promise<Host[] | null> {
     return null;
   }
-  async findByCredentials(): Promise<Host | null> {
-    /* 
-    const isEmail = username.includes('@')
-    
-    // Find user by either email or phone
-    const user = await prisma.user.findFirst({
-      where: isEmail 
-        ? { email: username }
-        : { phone: username }
-    })
-    */
-    return new Host(
-      2,
-      "Alice",
-      "Smith",
-      "alice.smith@example.com",
-      "1234567890",
-      "https://example.com/profiles/alice.jpg",
-      1,
-      "",
-      false,
-      null,
-      "",
-      new Date("2024-01-15T08:00:00Z")
-    );
+  async findByCredentials(
+    username: string,
+    password: string
+  ): Promise<Host | null> {
+    const result = await this.prisma.host.findFirst({
+      where: {
+        OR: [{ email: username }, { phone: username }],
+      },
+    });
+    if (result) {
+      if (result.password === password) {
+        return new Host(
+          result.id,
+          result.firstName,
+          result.lastName,
+          result.email,
+          result.phone,
+          result.profile,
+          result.org_id!,
+          result.role,
+          result.isDeleted,
+          result.deletedDate,
+          result.password,
+          result.createdAt
+        );
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 
   async findByHostname(Hostname: string): Promise<Host | null> {
