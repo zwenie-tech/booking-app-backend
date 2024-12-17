@@ -77,13 +77,23 @@ export class AuthController {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {}
+  ): Promise<void> {
+    res.status(200).json({
+      success: true,
+      refreshToken: ""
+    })
+  }
 
   async logoutUser(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {}
+  ): Promise<void> {
+    res.status(200).json({
+      success: true,
+      message: "user logout"
+    })
+  }
 
   async loginHost(
     req: Request,
@@ -134,11 +144,21 @@ export class AuthController {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {}
+  ): Promise<void> {
+    res.status(200).json({
+      success: true,
+      refreshToken: ""
+    })
+  }
 
   async logoutHost(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {}
+  ): Promise<void> {
+    res.status(200).json({
+      success: true,
+      message: "host logout"
+    })
+  }
 }
