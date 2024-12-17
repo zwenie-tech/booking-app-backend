@@ -51,4 +51,6 @@ jobs:
             -e BUCKET_REGION=${{secrets.BUCKET_REGION}} \
             -e ACCESS_KEY=${{secrets.ACCESS_KEY}} \
             -e SECRET_ACCESS_KEY=${{secrets.SECRET_ACCESS_KEY}} \
+            -e REFRESH_TOKEN_EXPIRES=${{secrets.REFRESH_TOKEN_EXPIRES}}
+            -e ACCESS_TOKEN_EXPIRES=${{secrets.ACCESS_TOKEN_EXPIRES}}
             -p 3000:3000 binshadcs/booking-app-api:latest
