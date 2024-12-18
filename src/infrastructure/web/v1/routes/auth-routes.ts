@@ -1,7 +1,5 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/auth-controller";
-import { UserController } from "../controllers/user-controller";
-import { HostController } from "../controllers/host-controller";
 
 export class AuthRouter {
   private router: Router;
