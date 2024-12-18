@@ -1,7 +1,4 @@
-FROM node:20-alpine
-
-RUN apk add --no-cache openssl1.1-compat
-
+FROM node:20
 ARG DATABASE_URL
 
 WORKDIR /usr/src/app
