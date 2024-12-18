@@ -40,7 +40,6 @@ jobs:
           sudo docker stop web-app || true
           sudo docker rm web-app || true
           sudo docker run -d --restart always --name web-app \
-            -e DB_URL=${{ secrets.DB_URL }} \
             -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
             -e PORT=${{secrets.PORT}} \
             -e DATABASE_URL=${{secrets.DATABASE_URL}} \
