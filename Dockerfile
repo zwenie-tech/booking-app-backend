@@ -1,4 +1,8 @@
 FROM node:20
+
+# Install libssl 1.1
+RUN apt-get update && apt-get install -y libssl1.1 && rm -rf /var/lib/apt/lists/*
+
 ARG DATABASE_URL
 
 WORKDIR /usr/src/app
