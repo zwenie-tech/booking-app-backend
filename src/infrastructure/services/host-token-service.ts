@@ -20,8 +20,8 @@ export class HostTokenService implements HostTokenServiceRepository {
     return jwt.sign({ userId }, secret, { expiresIn });
   }
 
-  async generateAccessToken(hostToken: HostToken): Promise<string> {
-    return this.generateToken(hostToken.hostId, "access");
+  async generateAccessToken(hostId: number): Promise<string> {
+    return this.generateToken(hostId, "access");
   }
 
   async generateRefreshToken(hostToken: HostToken): Promise<string> {
@@ -39,10 +39,10 @@ export class HostTokenService implements HostTokenServiceRepository {
     return result.token;
   }
 
-  async verifyAccessToken(token: string): Promise<string | null> {
+  async verifyAccessToken(token: string): Promise<number | null> {
     try {
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
-        userId: string;
+        userId: number;
       };
       return decoded.userId;
     } catch {
@@ -50,10 +50,10 @@ export class HostTokenService implements HostTokenServiceRepository {
     }
   }
 
-  async verifyRefreshToken(token: string): Promise<string | null> {
+  async verifyRefreshToken(token: string): Promise<number | null> {
     try {
       const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!) as {
-        userId: string;
+        userId: number;
       };
       return decoded.userId;
     } catch {

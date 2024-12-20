@@ -1,21 +1,25 @@
 import { NextFunction, Request, Response } from "express";
 import { GetUserUseCase } from "../../../../application/use-cases/user/get-user";
-import { LoginValidate } from "../../../validators/auth-schema";
+import {
+  LoginValidate,
+  RefreshTokenValidate,
+} from "../../../validators/auth-schema";
 import { util } from "../../../../shared/utils/common";
 import { GetHostUseCase } from "../../../../application/use-cases/host/get-host";
 import { HostLoginUseCase } from "../../../../application/use-cases/auth/host/host-login";
 import { HostLogoutUseCase } from "../../../../application/use-cases/auth/host/host-logout";
-import { HostRefreshTokenUseCase } from "../../../../application/use-cases/auth/host/host-refresh-token";
+import { HostRefreshTokenUseCase } from "../../../../application/use-cases/auth/host/host-access-token";
 import { UserLoginUseCase } from "../../../../application/use-cases/auth/user/user-login";
 import { UserLogoutUseCase } from "../../../../application/use-cases/auth/user/user-logout";
-import { UserRefreshTokenUseCase } from "../../../../application/use-cases/auth/user/user-refresh-token";
+import { UserAccessTokenUseCase } from "../../../../application/use-cases/auth/user/user-access-token";
+import { CustomResponse } from "../../../../shared/types/request";
 
 export class AuthController {
   constructor(
     private getUserUseCase: GetUserUseCase,
     private userLoginUseCase: UserLoginUseCase,
     private userLogoutUseCase: UserLogoutUseCase,
-    private userRefreshTokenUseCase: UserRefreshTokenUseCase,
+    private userRefreshTokenUseCase: UserAccessTokenUseCase,
     private getHostUseCase: GetHostUseCase,
     private hostLoginUseCase: HostLoginUseCase,
     private hostLogoutUseCase: HostLogoutUseCase,
@@ -29,40 +33,48 @@ export class AuthController {
   ): Promise<void> {
     const { username, password } = req.body;
     const result = LoginValidate.safeParse({ username, password });
-    const hashedPassword = await util.hashPassword(password);
     if (result.success) {
-      if (hashedPassword)
-        try {
-          const user = await this.getUserUseCase.findByCredentials(
-            username,
-            hashedPassword
-          );
-          if (user) {
-            try {
-              const token = await this.userLoginUseCase.execute(user.id);
-              res.status(200).json({
-                message: "You have successfully logged in.",
-                success: true,
-                data: {
-                  userId: user.id,
-                  accessToken: token?.accessToken,
-                  refreshToken: token?.refreshToken,
-                },
+      try {
+        const user = await this.getUserUseCase.findByUsername(username);
+        if (user) {
+          try {
+            const isMatch = await util.compareHash(password, user.password);
+            if (isMatch) {
+              try {
+                const token = await this.userLoginUseCase.execute(user.id);
+                res.status(200).json({
+                  message: "You have successfully logged in.",
+                  success: true,
+                  data: {
+                    userId: user.id,
+                    accessToken: token?.accessToken,
+                    refreshToken: token?.refreshToken,
+                  },
+                });
+              } catch (err) {
+                res.status(402);
+                next(err);
+              }
+            } else {
+              res.status(403).json({
+                success: false,
+                message: "Invalid password",
               });
-            } catch (err) {
-              res.status(402);
-              next(err);
             }
-          } else {
-            res.status(401).json({
-              success: false,
-              message: "Login failed. Check your credentials and try again.",
-            });
+          } catch (error) {
+            res.status(402);
+            next(error);
           }
-        } catch (error: any) {
-          res.status(400);
-          next(error);
+        } else {
+          res.status(401).json({
+            success: false,
+            message: "user not found with username",
+          });
         }
+      } catch (error: any) {
+        res.status(400);
+        next(error);
+      }
     } else {
       const formattedErrors = util.handleValidationError(result.error);
       res.status(400).json({
@@ -78,21 +90,57 @@ export class AuthController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    res.status(200).json({
-      success: true,
-      refreshToken: ""
-    })
+    const { refreshToken } = req.body;
+    const result = RefreshTokenValidate.safeParse({ refreshToken });
+    if (result.success) {
+      try {
+        const accessToken = await this.userRefreshTokenUseCase.execute(
+          refreshToken
+        );
+        res.status(200).json({
+          success: true,
+          message: "You have successfully logged in.",
+          data: {
+            accessToken,
+            refreshToken,
+          },
+        });
+      } catch (error) {
+        res.status(403);
+        next(error);
+      }
+    } else {
+      const formattedErrors = util.handleValidationError(result.error);
+      res.status(403).json({
+        success: false,
+        message: "Validation failed",
+        errors: formattedErrors,
+      });
+    }
   }
 
   async logoutUser(
     req: Request,
-    res: Response,
+    res: CustomResponse,
     next: NextFunction
   ): Promise<void> {
-    res.status(200).json({
-      success: true,
-      message: "user logout"
-    })
+    try {
+      const user = await this.userLogoutUseCase.execute(res.userId!);
+      if (user) {
+        res.status(200).json({
+          success: true,
+          message: "User logout",
+        });
+      } else {
+        res.status(403).json({
+          success: false,
+          message: "Invalid refresh token",
+        });
+      }
+    } catch (error) {
+      res.status(403);
+      next(error);
+    }
   }
 
   async loginHost(
@@ -106,7 +154,7 @@ export class AuthController {
     if (result.success) {
       if (hashedPassword)
         try {
-          const user = await this.getUserUseCase.findByCredentials(
+          const user = await this.getHostUseCase.findByCredentials(
             username,
             hashedPassword
           );
@@ -147,8 +195,8 @@ export class AuthController {
   ): Promise<void> {
     res.status(200).json({
       success: true,
-      refreshToken: ""
-    })
+      refreshToken: "",
+    });
   }
 
   async logoutHost(
@@ -158,7 +206,7 @@ export class AuthController {
   ): Promise<void> {
     res.status(200).json({
       success: true,
-      message: "host logout"
-    })
+      message: "host logout",
+    });
   }
 }

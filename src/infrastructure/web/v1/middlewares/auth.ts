@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { HostTokenServiceRepository } from "../../../../domain/repositories/host-token-service-repository.interface";
 import { UserTokenServiceRepository } from "../../../../domain/repositories/user-token-service-repository.interface";
+import { CustomRequest } from "../../../../shared/types/request";
 
 export class AuthMiddleware {
   private hostTokenService: HostTokenServiceRepository;
@@ -12,23 +13,22 @@ export class AuthMiddleware {
   ) {
     this.hostTokenService = hostTokenService;
     this.userTokenService = userTokenService;
+    this.hostAuth = this.hostAuth.bind(this);
+    this.userAuth = this.userAuth.bind(this);
   }
 
-  private splitToken(bearerToken: string): string {
-    const token = bearerToken.split(" ")[1];
-    return token;
-  }
   async hostAuth(
-    req: Request,
+    req: CustomRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const authHeader = req.headers["authorization"];
-    if (authHeader) {
-      const token = this.splitToken(authHeader);
+    const { authorization } = req.headers;
+    if (authorization) {
       try {
+        const token = authorization.replace("Bearer ", "");
         const result = await this.hostTokenService.verifyAccessToken(token);
         if (result) {
+          req.hostId = result;
           next();
         } else {
           res.status(403).json({
@@ -49,16 +49,17 @@ export class AuthMiddleware {
   }
 
   async userAuth(
-    req: Request,
+    req: CustomRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const authHeader = req.headers["authorization"];
-    if (authHeader) {
-      const token = this.splitToken(authHeader);
+    const { authorization } = req.headers;
+    if (authorization) {
       try {
+        const token = authorization.replace("Bearer ", "");
         const result = await this.userTokenService.verifyAccessToken(token);
         if (result) {
+          req.userId = result;
           next();
         } else {
           res.status(403).json({

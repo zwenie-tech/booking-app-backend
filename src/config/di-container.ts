@@ -17,10 +17,11 @@ import { UserLoginUseCase } from "../application/use-cases/auth/user/user-login"
 import { UserTokenService } from "../infrastructure/services/user-token-service";
 import { HostTokenService } from "../infrastructure/services/host-token-service";
 import { UserLogoutUseCase } from "../application/use-cases/auth/user/user-logout";
-import { UserRefreshTokenUseCase } from "../application/use-cases/auth/user/user-refresh-token";
+import { UserAccessTokenUseCase } from "../application/use-cases/auth/user/user-access-token";
 import { HostLoginUseCase } from "../application/use-cases/auth/host/host-login";
 import { HostLogoutUseCase } from "../application/use-cases/auth/host/host-logout";
-import { HostRefreshTokenUseCase } from "../application/use-cases/auth/host/host-refresh-token";
+import { HostRefreshTokenUseCase } from "../application/use-cases/auth/host/host-access-token";
+import { AuthMiddleware } from "../infrastructure/web/v1/middlewares/auth";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -51,7 +52,7 @@ export class DiContainer {
     const getUserUseCase = new GetUserUseCase(userRepository);
     const userLoginUseCase = new UserLoginUseCase(userTokenServiceRepository);
     const userLogoutUseCase = new UserLogoutUseCase(userTokenServiceRepository);
-    const userRefreshTokenUseCase = new UserRefreshTokenUseCase(
+    const userAccessTokenUseCase = new UserAccessTokenUseCase(
       userTokenServiceRepository
     );
     const getHostUseCase = new GetHostUseCase(hostRepository);
@@ -70,7 +71,7 @@ export class DiContainer {
       getUserUseCase,
       userLoginUseCase,
       userLogoutUseCase,
-      userRefreshTokenUseCase,
+      userAccessTokenUseCase,
       getHostUseCase,
       hostLoginUseCase,
       hostLogoutUseCase,
@@ -81,9 +82,15 @@ export class DiContainer {
       hostLoginUseCase
     );
 
+    // Middleware
+    const authMiddleware = new AuthMiddleware(
+      hostTokenServiceRepository,
+      userTokenServiceRepository
+    );
+
     // Routers
     this.userRoutes = new UserRouter(userController);
-    this.authRoutes = new AuthRouter(authController);
+    this.authRoutes = new AuthRouter(authController, authMiddleware);
     this.hostRoutes = new HostRouter(hostController);
   }
 

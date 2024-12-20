@@ -20,8 +20,8 @@ export class UserTokenService implements UserTokenServiceRepository {
     return jwt.sign({ userId }, secret, { expiresIn });
   }
 
-  async generateAccessToken(userToken: UserToken): Promise<string> {
-    return this.generateToken(userToken.userId, "access");
+  async generateAccessToken(userId: number): Promise<string> {
+    return this.generateToken(userId!, "access");
   }
 
   async generateRefreshToken(userToken: UserToken): Promise<string> {
@@ -39,10 +39,10 @@ export class UserTokenService implements UserTokenServiceRepository {
     return result.token;
   }
 
-  async verifyAccessToken(token: string): Promise<string | null> {
+  async verifyAccessToken(token: string): Promise<number | null> {
     try {
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
-        userId: string;
+        userId: number;
       };
       return decoded.userId;
     } catch {
@@ -50,10 +50,10 @@ export class UserTokenService implements UserTokenServiceRepository {
     }
   }
 
-  async verifyRefreshToken(token: string): Promise<string | null> {
+  async verifyRefreshToken(token: string): Promise<number | null> {
     try {
       const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!) as {
-        userId: string;
+        userId: number;
       };
       return decoded.userId;
     } catch {
@@ -61,7 +61,7 @@ export class UserTokenService implements UserTokenServiceRepository {
     }
   }
 
-  async revokeRefreshToken(userId: number): Promise<void> {
-    await this.tokenRepository.deleteRefreshToken(userId);
+  async revokeRefreshToken(userId: number): Promise<boolean> {
+    return await this.tokenRepository.deleteRefreshToken(userId);
   }
 }
