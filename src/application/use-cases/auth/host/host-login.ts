@@ -9,7 +9,7 @@ export class HostLoginUseCase {
   } | null> {
     const hostToken = new HostToken(0, userId, "", new Date(), new Date());
     const accessToken = await this.hostTokenService.generateAccessToken(
-      hostToken
+      userId
     );
     const refreshToken = await this.hostTokenService.generateRefreshToken(
       hostToken

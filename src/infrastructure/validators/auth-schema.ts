@@ -5,5 +5,6 @@ export const LoginValidate = z.object({
   password: z.string({ message: "invalid password" }),
 });
 
-
-
+export const RefreshTokenValidate = z.object({
+  refreshToken: z.string({ message: "Invalid refresh token" }),
+});

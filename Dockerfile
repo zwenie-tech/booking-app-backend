@@ -1,4 +1,4 @@
-FROM node:22
+FROM node:22-alpine
 ARG DATABASE_URL
 
 WORKDIR /usr/src/app

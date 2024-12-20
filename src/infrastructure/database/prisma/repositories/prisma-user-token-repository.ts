@@ -41,11 +41,16 @@ export class PrismaUserTokenRepository implements UserTokenRepository {
     }
   }
 
-  async deleteRefreshToken(userId: number): Promise<void> {
-    await this.prisma.refreshToken.deleteMany({
+  async deleteRefreshToken(userId: number): Promise<boolean> {
+    const result = await this.prisma.refreshToken.deleteMany({
       where: {
         userId,
       },
     });
+    if(result) {
+      return true
+    } else {
+      return false
+    }
   }
 }

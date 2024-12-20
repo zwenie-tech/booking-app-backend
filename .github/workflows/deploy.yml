@@ -53,3 +53,4 @@ jobs:
             -e REFRESH_TOKEN_EXPIRES=${{secrets.REFRESH_TOKEN_EXPIRES}} \
             -e ACCESS_TOKEN_EXPIRES=${{secrets.ACCESS_TOKEN_EXPIRES}} \
             -p 3000:3000 binshadcs/booking-app-api:latest
+          sudo docker image prune -a -f

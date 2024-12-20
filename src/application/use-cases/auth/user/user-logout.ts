@@ -2,7 +2,7 @@ import { UserTokenServiceRepository } from "../../../../domain/repositories/user
 
 export class UserLogoutUseCase {
   constructor(private userTokenService: UserTokenServiceRepository) {}
-  async execute(userId: number): Promise<void> {
-    this.userTokenService.revokeRefreshToken(userId);
+  async execute(userId: number): Promise<boolean> {
+    return await this.userTokenService.revokeRefreshToken(userId);
   }
 }

@@ -9,7 +9,7 @@ export class UserLoginUseCase {
   } | null> {
     const hostToken = new UserToken(0, userId, "", new Date(), new Date());
     const accessToken = await this.userTokenService.generateAccessToken(
-      hostToken
+      userId
     );
     const refreshToken = await this.userTokenService.generateRefreshToken(
       hostToken
