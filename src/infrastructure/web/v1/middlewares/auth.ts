@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { HostTokenServiceRepository } from "../../../../domain/repositories/host-token-service-repository.interface";
 import { UserTokenServiceRepository } from "../../../../domain/repositories/user-token-service-repository.interface";
-import { CustomRequest } from "../../../../shared/types/request";
+import { AppRequest } from "../../../../shared/types";
 
 export class AuthMiddleware {
   private hostTokenService: HostTokenServiceRepository;
@@ -18,7 +18,7 @@ export class AuthMiddleware {
   }
 
   async hostAuth(
-    req: CustomRequest,
+    req: AppRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
@@ -49,7 +49,7 @@ export class AuthMiddleware {
   }
 
   async userAuth(
-    req: CustomRequest,
+    req: AppRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {

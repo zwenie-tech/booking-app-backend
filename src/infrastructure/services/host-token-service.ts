@@ -61,7 +61,7 @@ export class HostTokenService implements HostTokenServiceRepository {
     }
   }
 
-  async revokeRefreshToken(userId: number): Promise<void> {
-    await this.tokenRepository.deleteRefreshToken(userId);
+  async revokeRefreshToken(userId: number): Promise<boolean> {
+    return await this.tokenRepository.deleteRefreshToken(userId);
   }
 }

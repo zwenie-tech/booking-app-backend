@@ -41,11 +41,16 @@ export class PrismaHostTokenRepository implements HostTokenRepository {
     }
   }
 
-  async deleteRefreshToken(hostId: number): Promise<void> {
-    await this.prisma.refreshTokenHost.deleteMany({
+  async deleteRefreshToken(hostId: number): Promise<boolean> {
+    const result = await this.prisma.refreshTokenHost.deleteMany({
       where: {
         hostId,
       },
     });
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

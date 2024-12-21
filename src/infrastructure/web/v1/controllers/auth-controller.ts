@@ -12,7 +12,7 @@ import { HostRefreshTokenUseCase } from "../../../../application/use-cases/auth/
 import { UserLoginUseCase } from "../../../../application/use-cases/auth/user/user-login";
 import { UserLogoutUseCase } from "../../../../application/use-cases/auth/user/user-logout";
 import { UserAccessTokenUseCase } from "../../../../application/use-cases/auth/user/user-access-token";
-import { CustomResponse } from "../../../../shared/types/request";
+import { AppResponse } from "../../../../shared/types";
 
 export class AuthController {
   constructor(
@@ -68,7 +68,7 @@ export class AuthController {
         } else {
           res.status(401).json({
             success: false,
-            message: "user not found with username",
+            message: "User not found with username",
           });
         }
       } catch (error: any) {
@@ -99,7 +99,7 @@ export class AuthController {
         );
         res.status(200).json({
           success: true,
-          message: "You have successfully logged in.",
+          message: "Your access token has been successfully regenerated",
           data: {
             accessToken,
             refreshToken,
@@ -121,7 +121,7 @@ export class AuthController {
 
   async logoutUser(
     req: Request,
-    res: CustomResponse,
+    res: AppResponse,
     next: NextFunction
   ): Promise<void> {
     try {
@@ -150,34 +150,48 @@ export class AuthController {
   ): Promise<void> {
     const { username, password } = req.body;
     const result = LoginValidate.safeParse({ username, password });
-    const hashedPassword = await util.hashPassword(password);
     if (result.success) {
-      if (hashedPassword)
-        try {
-          const user = await this.getHostUseCase.findByCredentials(
-            username,
-            hashedPassword
-          );
-          if (user) {
-            res.status(200).json({
-              message: "You have successfully logged in.",
-              success: true,
-              data: {
-                userId: user.id,
-                accessToken: "",
-                refreshToken: "",
-              },
-            });
-          } else {
-            res.status(401).json({
-              success: false,
-              message: "Login failed. Check your credentials and try again.",
-            });
+      try {
+        const user = await this.getHostUseCase.findByUsername(username);
+        if (user) {
+          try {
+            const isMatch = await util.compareHash(password, user.password);
+            if (isMatch) {
+              try {
+                const token = await this.hostLoginUseCase.execute(user.id);
+                res.status(200).json({
+                  success: true,
+                  message: "You have successfully logged in.",
+                  data: {
+                    hostId: user.id,
+                    accessToken: token?.accessToken,
+                    refreshToken: token?.refreshToken,
+                  },
+                });
+              } catch (error) {
+                res.status(402);
+                next(error);
+              }
+            } else {
+              res.status(403).json({
+                success: false,
+                message: "Invalid password",
+              });
+            }
+          } catch (error) {
+            res.status(403);
+            next(error);
           }
-        } catch (error: any) {
-          res.status(400);
-          next(error);
+        } else {
+          res.status(401).json({
+            success: false,
+            message: "Host not found with username",
+          });
         }
+      } catch (error: any) {
+        res.status(400);
+        next(error);
+      }
     } else {
       const formattedErrors = util.handleValidationError(result.error);
       res.status(400).json({
@@ -193,20 +207,52 @@ export class AuthController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    res.status(200).json({
-      success: true,
-      refreshToken: "",
-    });
+    const { refreshToken } = req.body;
+    const result = RefreshTokenValidate.safeParse({ refreshToken });
+    if (result.success) {
+      try {
+        const accessToken = await this.hostRefreshTokenUseCase.execute(
+          refreshToken
+        );
+        res.status(200).json({
+          success: true,
+          message: "Your access token has been successfully regenerated",
+          data: {
+            accessToken,
+            refreshToken,
+          },
+        });
+      } catch (error) {
+        res.status(401);
+        next(error);
+      }
+    } else {
+      const formattedErrors = util.handleValidationError(result.error);
+      res.status(403).json({
+        success: false,
+        message: "Validation failed",
+        errors: formattedErrors,
+      });
+    }
   }
 
   async logoutHost(
     req: Request,
-    res: Response,
+    res: AppResponse,
     next: NextFunction
   ): Promise<void> {
-    res.status(200).json({
-      success: true,
-      message: "host logout",
-    });
+    try {
+      const host = await this.hostLogoutUseCase.execute(res.hostId!);
+      if (host) {
+      } else {
+        res.status(403).json({
+          success: false,
+          message: "Invalid refresh token",
+        });
+      }
+    } catch (error) {
+      res.status(402);
+      next(error);
+    }
   }
 }
