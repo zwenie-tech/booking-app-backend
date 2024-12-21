@@ -2,7 +2,7 @@ import { HostTokenServiceRepository } from "../../../../domain/repositories/host
 
 export class HostLogoutUseCase {
     constructor(private hostTokenService: HostTokenServiceRepository){}
-    async execute(hostId: number): Promise<void> {
-        this.hostTokenService.revokeRefreshToken(hostId);
+    async execute(hostId: number): Promise<boolean> {
+        return this.hostTokenService.revokeRefreshToken(hostId);
     }
 }

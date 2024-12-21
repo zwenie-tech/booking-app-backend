@@ -1,13 +1,16 @@
 import { CreateHostUseCase } from "../../../../application/use-cases/host/create-host";
 import { util } from "../../../../shared/utils/common";
 import { NextFunction, Request, Response } from "express";
-import { UserRegisterValidate } from "../../../validators/user-schema";
 import { HostLoginUseCase } from "../../../../application/use-cases/auth/host/host-login";
+import { HostRegisterValidate } from "../../../validators/host-schema";
+import { GetHostUseCase } from "../../../../application/use-cases/host/get-host";
+import { AppResponse } from "../../../../shared/types";
 
 export class HostController {
   constructor(
     private createHostUseCase: CreateHostUseCase,
-    private hostLoginUseCase: HostLoginUseCase
+    private hostLoginUseCase: HostLoginUseCase,
+    private getHostUseCase: GetHostUseCase
   ) {}
 
   async createHost(
@@ -16,7 +19,7 @@ export class HostController {
     next: NextFunction
   ): Promise<void> {
     const { firstName, lastName, email, phone, password } = req.body;
-    const result = UserRegisterValidate.safeParse({
+    const result = HostRegisterValidate.safeParse({
       firstName,
       lastName,
       email,
@@ -66,6 +69,37 @@ export class HostController {
         message: "Validation failed",
         errors: formattedErrors,
       });
+    }
+  }
+
+  async getHost(
+    req: Request,
+    res: AppResponse,
+    next: NextFunction
+  ): Promise<void> {
+    try{
+      const host = await this.getHostUseCase.execute(res.hostId!);
+      if(host) {
+        res.status(200).json({
+          success: true,
+          data: {
+            hostId : host.id,
+            firstName : host.firstName,
+            lastName: host.lastName,
+            email: host.email,
+            phone: host.phone,
+            profile: host.profile
+          }
+        })
+      } else {
+        res.status(402).json({
+          success: false,
+          message: "Host not found with id"
+        })
+      }
+    }catch(error) {
+      res.status(403);
+      next(error)
     }
   }
 }

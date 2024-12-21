@@ -65,7 +65,8 @@ export class DiContainer {
     // Controllers
     const userController = new UserController(
       createUserUseCase,
-      userLoginUseCase
+      userLoginUseCase,
+      getUserUseCase
     );
     const authController = new AuthController(
       getUserUseCase,
@@ -79,7 +80,8 @@ export class DiContainer {
     );
     const hostController = new HostController(
       createHostUseCase,
-      hostLoginUseCase
+      hostLoginUseCase,
+      getHostUseCase
     );
 
     // Middleware
@@ -89,9 +91,9 @@ export class DiContainer {
     );
 
     // Routers
-    this.userRoutes = new UserRouter(userController);
+    this.userRoutes = new UserRouter(userController, authMiddleware);
     this.authRoutes = new AuthRouter(authController, authMiddleware);
-    this.hostRoutes = new HostRouter(hostController);
+    this.hostRoutes = new HostRouter(hostController, authMiddleware);
   }
 
   public static getInstance(): DiContainer {

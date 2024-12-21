@@ -5,5 +5,5 @@ export interface HostTokenServiceRepository {
   generateRefreshToken(hostToken: HostToken): Promise<string>;
   verifyAccessToken(token: string): Promise<number | null>;
   verifyRefreshToken(token: string): Promise<number | null>;
-  revokeRefreshToken(userId: number): Promise<void>;
+  revokeRefreshToken(userId: number): Promise<boolean>;
 }
