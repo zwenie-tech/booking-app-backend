@@ -255,4 +255,15 @@ export class AuthController {
       next(error);
     }
   }
+
+  async forgetPassword(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    res.status(200).json({
+      success: true,
+      message: "I am working on it!",
+    });
+  }
 }

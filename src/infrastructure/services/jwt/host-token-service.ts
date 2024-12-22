@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import { UserTokenRepository } from "../../domain/repositories/user-token-repository.interface";
-import { UserToken } from "../../domain/entities/user-token.entitiy";
-import { UserTokenServiceRepository } from "../../domain/repositories/user-token-service-repository.interface";
+import { HostTokenServiceRepository } from "../../../domain/repositories/host-token-service-repository.interface";
+import { HostTokenRepository } from "../../../domain/repositories/host-token-repository.interface";
+import { HostToken } from "../../../domain/entities/host-token.entitiy";
 
-export class UserTokenService implements UserTokenServiceRepository {
-  constructor(private tokenRepository: UserTokenRepository) {}
+export class HostTokenService implements HostTokenServiceRepository {
+  constructor(private tokenRepository: HostTokenRepository) {}
 
   private generateToken(userId: number, type: "access" | "refresh"): string {
     const secret =
@@ -20,19 +20,19 @@ export class UserTokenService implements UserTokenServiceRepository {
     return jwt.sign({ userId }, secret, { expiresIn });
   }
 
-  async generateAccessToken(userId: number): Promise<string> {
-    return this.generateToken(userId!, "access");
+  async generateAccessToken(hostId: number): Promise<string> {
+    return this.generateToken(hostId, "access");
   }
 
-  async generateRefreshToken(userToken: UserToken): Promise<string> {
-    const token = this.generateToken(userToken.userId, "refresh");
+  async generateRefreshToken(hostToken: HostToken): Promise<string> {
+    const token = this.generateToken(hostToken.hostId, "refresh");
     const result = await this.tokenRepository.storeRefreshToken(
-      new UserToken(
-        userToken.id,
-        userToken.userId,
+      new HostToken(
+        hostToken.id,
+        hostToken.hostId,
         token,
-        userToken.createdAt,
-        userToken.expiresAt
+        hostToken.createdAt,
+        hostToken.expiresAt
       )
     );
 
