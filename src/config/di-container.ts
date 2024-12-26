@@ -14,14 +14,14 @@ import { HostController } from "../infrastructure/web/v1/controllers/host-contro
 import { HostRouter } from "../infrastructure/web/v1/routes/host-routes";
 import { GetHostUseCase } from "../application/use-cases/host/get-host";
 import { UserLoginUseCase } from "../application/use-cases/auth/user/user-login";
-import { UserTokenService } from "../infrastructure/services/user-token-service";
-import { HostTokenService } from "../infrastructure/services/host-token-service";
 import { UserLogoutUseCase } from "../application/use-cases/auth/user/user-logout";
 import { UserAccessTokenUseCase } from "../application/use-cases/auth/user/user-access-token";
 import { HostLoginUseCase } from "../application/use-cases/auth/host/host-login";
 import { HostLogoutUseCase } from "../application/use-cases/auth/host/host-logout";
 import { HostRefreshTokenUseCase } from "../application/use-cases/auth/host/host-access-token";
 import { AuthMiddleware } from "../infrastructure/web/v1/middlewares/auth";
+import { UserTokenService } from "../infrastructure/services/jwt/user-token-service";
+import { HostTokenService } from "../infrastructure/services/jwt/host-token-service";
 
 export class DiContainer {
   private static instance: DiContainer;

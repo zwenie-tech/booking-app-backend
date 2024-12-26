@@ -46,6 +46,8 @@ jobs:
             -e NODE_ENV=${{secrets.development}} \
             -e ACCESS_TOKEN_SECRET=${{secrets.ACCESS_TOKEN_SECRET}} \
             -e REFRESH_TOKEN_SECRET=${{secrets.REFRESH_TOKEN_SECRET}} \
+            -e ACCESS_TOKEN_SECRET_HOST=${{secrets.ACCESS_TOKEN_SECRET_HOST}} \
+            -e REFRESH_TOKEN_SECRET_HOST=${{secrets.REFRESH_TOKEN_SECRET_HOST}} \
             -e BUCKET_NAME=${{secrets.BUCKET_NAME}} \
             -e BUCKET_REGION=${{secrets.BUCKET_REGION}} \
             -e ACCESS_KEY=${{secrets.ACCESS_KEY}} \

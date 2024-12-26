@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import { UserTokenRepository } from "../../domain/repositories/user-token-repository.interface";
-import { UserToken } from "../../domain/entities/user-token.entitiy";
-import { UserTokenServiceRepository } from "../../domain/repositories/user-token-service-repository.interface";
+import { UserTokenServiceRepository } from "../../../domain/repositories/user-token-service-repository.interface";
+import { UserTokenRepository } from "../../../domain/repositories/user-token-repository.interface";
+import { UserToken } from "../../../domain/entities/user-token.entitiy";
 
 export class UserTokenService implements UserTokenServiceRepository {
   constructor(private tokenRepository: UserTokenRepository) {}

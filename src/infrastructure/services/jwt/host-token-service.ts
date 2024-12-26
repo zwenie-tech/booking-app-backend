@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import { HostTokenRepository } from "../../domain/repositories/host-token-repository.interface";
-import { HostTokenServiceRepository } from "../../domain/repositories/host-token-service-repository.interface";
-import { HostToken } from "../../domain/entities/host-token.entitiy";
+import { HostTokenServiceRepository } from "../../../domain/repositories/host-token-service-repository.interface";
+import { HostTokenRepository } from "../../../domain/repositories/host-token-repository.interface";
+import { HostToken } from "../../../domain/entities/host-token.entitiy";
 
 export class HostTokenService implements HostTokenServiceRepository {
   constructor(private tokenRepository: HostTokenRepository) {}
@@ -9,8 +9,8 @@ export class HostTokenService implements HostTokenServiceRepository {
   private generateToken(userId: number, type: "access" | "refresh"): string {
     const secret =
       type === "access"
-        ? process.env.ACCESS_TOKEN_SECRET!
-        : process.env.REFRESH_TOKEN_SECRET!;
+        ? process.env.ACCESS_TOKEN_SECRET_HOST!
+        : process.env.REFRESH_TOKEN_SECRET_HOST!;
 
     const expiresIn =
       type === "access"
