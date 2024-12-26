@@ -9,8 +9,8 @@ export class HostTokenService implements HostTokenServiceRepository {
   private generateToken(userId: number, type: "access" | "refresh"): string {
     const secret =
       type === "access"
-        ? process.env.ACCESS_TOKEN_SECRET!
-        : process.env.REFRESH_TOKEN_SECRET!;
+        ? process.env.ACCESS_TOKEN_SECRET_HOST!
+        : process.env.REFRESH_TOKEN_SECRET_HOST!;
 
     const expiresIn =
       type === "access"
