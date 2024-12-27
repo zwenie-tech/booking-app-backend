@@ -22,10 +22,10 @@ class Middleware {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    logger.error("Looks like this page is lost in the void. 🚀💫");
+    logger.error("End point not found. 🚀💫");
     res.status(404).json({
       success: false,
-      message: "Looks like this page is lost in the void. 🚀💫",
+      message: "End point not found. 🚀💫",
     });
   }
 }

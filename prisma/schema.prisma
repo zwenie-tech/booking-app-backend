@@ -52,6 +52,7 @@ model Host {
   updatedAt     DateTime        @updatedAt
   createdAt     DateTime        @default(now())
   refreshTokens RefreshTokenHost[]
+  organizer Organizer? @relation(fields: [org_id], references: [id])
 }
 
 model RefreshTokenHost {
@@ -61,4 +62,19 @@ model RefreshTokenHost {
   createdAt     DateTime        @default(now())
   expiresAt     DateTime
   host          Host            @relation(fields: [hostId], references: [id])
+}
+
+model Organizer {
+  id            Int             @id @default(autoincrement())
+  name          String
+  address       String
+  website       String?
+  logo          String?
+  about         String
+  facebook      String?
+  instagram     String?
+  twitter       String?
+  hosts         Host[]
+  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime        @default(now())
 }
