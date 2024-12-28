@@ -1,6 +1,6 @@
 import express, { Application } from "express";
 import helmet from "helmet";
-import cors from "cors";
+// import cors from "cors";
 import { DiContainer } from "./di-container";
 import { middleware } from "../infrastructure/web/v1/middlewares/error-handle";
 
@@ -19,9 +19,9 @@ export class App {
   private configureMiddleware(): void {
     this.app.use(express.json());
     this.app.use(helmet());
-    this.app.use(cors({
-      origin: '*'
-    }));
+    // this.app.use(cors({
+    //   origin: '*'
+    // }));
   }
 
   // configure routes here
