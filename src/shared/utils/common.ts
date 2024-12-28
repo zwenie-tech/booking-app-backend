@@ -2,6 +2,7 @@ import { genSalt, hash, compare } from "bcrypt";
 import { logger } from "./logger";
 import { config } from "./constants/app-constants";
 import { ZodError } from "zod";
+import crypto from "crypto";
 
 export class Util {
   private saltRound: number;
@@ -35,6 +36,10 @@ export class Util {
       message: e.message,
     }));
     return formattedErrors;
+  }
+
+  randomImageName() {
+    return crypto.randomBytes(32).toString("hex");
   }
 }
 
