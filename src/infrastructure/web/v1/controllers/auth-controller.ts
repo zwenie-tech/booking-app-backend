@@ -97,14 +97,22 @@ export class AuthController {
         const accessToken = await this.userRefreshTokenUseCase.execute(
           refreshToken
         );
-        res.status(200).json({
-          success: true,
-          message: "Your access token has been successfully regenerated",
-          data: {
-            accessToken,
-            refreshToken,
-          },
-        });
+        if(accessToken) {
+          res.status(200).json({
+            success: true,
+            message: "Your access token has been successfully regenerated",
+            data: {
+              accessToken,
+              refreshToken,
+            },
+          });
+        } else {
+          res.status(403).json({
+            success: false,
+            message: "Invalid refresh token."
+          })
+        }
+        
       } catch (error) {
         res.status(403);
         next(error);
@@ -214,14 +222,22 @@ export class AuthController {
         const accessToken = await this.hostRefreshTokenUseCase.execute(
           refreshToken
         );
-        res.status(200).json({
-          success: true,
-          message: "Your access token has been successfully regenerated",
-          data: {
-            accessToken,
-            refreshToken,
-          },
-        });
+        if(accessToken) {
+          res.status(200).json({
+            success: true,
+            message: "Your access token has been successfully regenerated",
+            data: {
+              accessToken,
+              refreshToken,
+            },
+          });
+        } else {
+          res.status(403).json({
+            success: false,
+            message : "Invalid refresh token."
+          })
+        }
+       
       } catch (error) {
         res.status(401);
         next(error);
