@@ -18,15 +18,19 @@ export class FileController {
       const result = ImageFileValidate.safeParse({ type, size });
       if (result.success) {
         try {
-          const key = util.randomImageName()
-          const url = await this.fileUploadUseCase.execute(req.file.buffer, key, type);
+          const key = util.randomImageName();
+          const url = await this.fileUploadUseCase.execute(
+            req.file.buffer,
+            key,
+            type
+          );
           res.status(201).json({
             success: true,
-            message : "File uploaded.",
+            message: "File uploaded.",
             data: {
-              url
-            }
-          })
+              url,
+            },
+          });
         } catch (error) {
           res.status(403);
           next(error);
