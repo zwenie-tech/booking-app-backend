@@ -1,0 +1,189 @@
+// src/domain/interfaces/ITokenService.ts
+export interface ITokenService {
+    generateAccessToken(userId: string): Promise<string>;
+    generateRefreshToken(userId: string): Promise<string>;
+    verifyAccessToken(token: string): Promise<string | null>;
+    verifyRefreshToken(token: string): Promise<string | null>;
+    revokeRefreshToken(userId: string): Promise<void>;
+  }
+  
+  // src/domain/interfaces/ITokenRepository.ts
+  export interface ITokenRepository {
+    storeRefreshToken(userId: string, token: string): Promise<void>;
+    getRefreshToken(userId: string): Promise<string | null>;
+    deleteRefreshToken(userId: string): Promise<void>;
+  }
+  
+  // src/infrastructure/repositories/TokenRepository.ts
+  import { PrismaClient } from '@prisma/client';
+  import { ITokenRepository } from '../../domain/interfaces/ITokenRepository';
+  
+  export class TokenRepository implements ITokenRepository {
+    private prisma: PrismaClient;
+  
+    constructor() {
+      this.prisma = new PrismaClient();
+    }
+  
+    async storeRefreshToken(userId: string, token: string): Promise<void> {
+      await this.prisma.refreshToken.create({
+        data: {
+          userId,
+          token,
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+        }
+      });
+    }
+  
+    async getRefreshToken(userId: string): Promise<string | null> {
+      const tokenRecord = await this.prisma.refreshToken.findUnique({
+        where: { userId }
+      });
+      return tokenRecord ? tokenRecord.token : null;
+    }
+  
+    async deleteRefreshToken(userId: string): Promise<void> {
+      await this.prisma.refreshToken.deleteMany({
+        where: { userId }
+      });
+    }
+  }
+  
+  // src/infrastructure/services/TokenService.ts
+  import jwt from 'jsonwebtoken';
+  import { ITokenService } from '../../domain/interfaces/ITokenService';
+  import { ITokenRepository } from '../../domain/interfaces/ITokenRepository';
+  
+  export class TokenService implements ITokenService {
+    constructor(private tokenRepository: ITokenRepository) {}
+  
+    private generateToken(
+      userId: string, 
+      type: 'access' | 'refresh'
+    ): string {
+      const secret = type === 'access' 
+        ? process.env.ACCESS_TOKEN_SECRET! 
+        : process.env.REFRESH_TOKEN_SECRET!;
+      
+      const expiresIn = type === 'access' 
+        ? '15m'  // Access token expires in 15 minutes
+        : '7d';  // Refresh token expires in 7 days
+  
+      return jwt.sign({ userId }, secret, { expiresIn });
+    }
+  
+    async generateAccessToken(userId: string): Promise<string> {
+      return this.generateToken(userId, 'access');
+    }
+  
+    async generateRefreshToken(userId: string): Promise<string> {
+      const token = this.generateToken(userId, 'refresh');
+      
+      // Store refresh token in repository
+      await this.tokenRepository.storeRefreshToken(userId, token);
+      
+      return token;
+    }
+  
+    async verifyAccessToken(token: string): Promise<string | null> {
+      try {
+        const decoded = jwt.verify(
+          token, 
+          process.env.ACCESS_TOKEN_SECRET!
+        ) as { userId: string };
+        return decoded.userId;
+      } catch {
+        return null;
+      }
+    }
+  
+    async verifyRefreshToken(token: string): Promise<string | null> {
+      try {
+        const decoded = jwt.verify(
+          token, 
+          process.env.REFRESH_TOKEN_SECRET!
+        ) as { userId: string };
+        return decoded.userId;
+      } catch {
+        return null;
+      }
+    }
+  
+    async revokeRefreshToken(userId: string): Promise<void> {
+      await this.tokenRepository.deleteRefreshToken(userId);
+    }
+  }
+  
+  // src/application/useCases/AuthUseCase.ts
+  export class AuthUseCase {
+    constructor(
+      private tokenService: ITokenService
+    ) {}
+  
+    async login(userId: string) {
+      const accessToken = await this.tokenService.generateAccessToken(userId);
+      const refreshToken = await this.tokenService.generateRefreshToken(userId);
+  
+      return {
+        accessToken,
+        refreshToken
+      };
+    }
+  
+    async refreshTokens(currentRefreshToken: string) {
+      // Verify the current refresh token
+      const userId = await this.tokenService.verifyRefreshToken(currentRefreshToken);
+      
+      if (!userId) {
+        throw new Error('Invalid refresh token');
+      }
+  
+      // Revoke the old refresh token and generate new tokens
+      await this.tokenService.revokeRefreshToken(userId);
+      
+      const newAccessToken = await this.tokenService.generateAccessToken(userId);
+      const newRefreshToken = await this.tokenService.generateRefreshToken(userId);
+  
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken
+      };
+    }
+  
+    async logout(userId: string) {
+      await this.tokenService.revokeRefreshToken(userId);
+    }
+  }
+  
+  // Example middleware for token verification
+  // src/infrastructure/middleware/authMiddleware.ts
+  import { Request, Response, NextFunction } from 'express';
+  
+  export const authenticateToken = async (
+    req: Request, 
+    res: Response, 
+    next: NextFunction
+  ) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+  
+    if (!token) {
+      return res.sendStatus(401);
+    }
+  
+    const tokenService = new TokenService(new TokenRepository());
+    const userId = await tokenService.verifyAccessToken(token);
+  
+    if (!userId) {
+      return res.sendStatus(403);
+    }
+  
+    // Attach user ID to the request for further use
+    req.userId = userId;
+    next();
+  };
+  
+  // .env configuration example
+  // ACCESS_TOKEN_SECRET=your_very_long_and_secure_random_string
+  // REFRESH_TOKEN_SECRET=another_different_very_long_and_secure_random_string

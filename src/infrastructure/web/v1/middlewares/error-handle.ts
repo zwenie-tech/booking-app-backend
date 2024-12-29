@@ -9,6 +9,7 @@ class Middleware {
     next: NextFunction
   ): Promise<void> {
     const responseBody = {
+      success: false,
       message: err.message,
       stack: process.env.NODE_ENV === "production" ? "🪲🔥😱" : err.stack,
     };
@@ -21,9 +22,10 @@ class Middleware {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    logger.error("Looks like this page is lost in the void. 🚀💫");
+    logger.error("End point not found. 🚀💫");
     res.status(404).json({
-      message: "Looks like this page is lost in the void. 🚀💫",
+      success: false,
+      message: "End point not found. 🚀💫",
     });
   }
 }

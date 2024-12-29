@@ -1,5 +1,4 @@
 export interface StorageRepository {
-  upload(file: Buffer, key: string): Promise<void>;
-  download(key: string): Promise<void>;
+  upload(file: Buffer, key: string, type: string): Promise<string>;
   delete(key: string): Promise<void>;
 }
