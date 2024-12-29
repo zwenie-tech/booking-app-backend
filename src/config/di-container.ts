@@ -25,6 +25,8 @@ import { HostTokenService } from "../infrastructure/services/jwt/host-token-serv
 import { FileRouter } from "../infrastructure/web/v1/routes/file-routes";
 import { FileController } from "../infrastructure/web/v1/controllers/file-controller";
 import { FileUploader } from "./multer";
+import { UploadFileUseCase } from "../application/use-cases/storage/upload-file";
+import { S3ObjectStoreService } from "../infrastructure/storage/s3-storage";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -50,6 +52,9 @@ export class DiContainer {
       hostTokenRepository
     );
 
+    // Storage repository 
+    const storageRepository = new S3ObjectStoreService()
+
     // Use cases
     const createUserUseCase = new CreateUserUseCase(userRepository);
     const createHostUseCase = new CreateHostUseCase(hostRepository);
@@ -65,6 +70,7 @@ export class DiContainer {
     const hostRefreshTokenUseCase = new HostRefreshTokenUseCase(
       hostTokenServiceRepository
     );
+    const fileUploadUseCase = new UploadFileUseCase(storageRepository);
 
     // Controllers
     const userController = new UserController(
@@ -87,7 +93,7 @@ export class DiContainer {
       hostLoginUseCase,
       getHostUseCase
     );
-    const fileController = new FileController();
+    const fileController = new FileController(fileUploadUseCase);
 
     // Middleware
     const authMiddleware = new AuthMiddleware(

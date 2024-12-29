@@ -3,6 +3,7 @@ import helmet from "helmet";
 import cors from "cors";
 import { DiContainer } from "./di-container";
 import { middleware } from "../infrastructure/web/v1/middlewares/error-handle";
+import cookieParser  from 'cookie-parser';
 
 export class App {
   private app: Application;
@@ -17,6 +18,7 @@ export class App {
   }
 
   private configureMiddleware(): void {
+    this.app.use(cookieParser());
     this.app.use(express.json());
     this.app.use(helmet());
     this.app.use(cors());
