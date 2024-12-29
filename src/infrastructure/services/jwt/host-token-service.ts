@@ -41,7 +41,7 @@ export class HostTokenService implements HostTokenServiceRepository {
 
   async verifyAccessToken(token: string): Promise<number | null> {
     try {
-      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_HOST!) as {
         userId: number;
       };
       return decoded.userId;
@@ -52,7 +52,7 @@ export class HostTokenService implements HostTokenServiceRepository {
 
   async verifyRefreshToken(token: string): Promise<number | null> {
     try {
-      const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!) as {
+      const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET_HOST!) as {
         userId: number;
       };
       return decoded.userId;
