@@ -22,12 +22,16 @@ import { HostRefreshTokenUseCase } from "../application/use-cases/auth/host/host
 import { AuthMiddleware } from "../infrastructure/web/v1/middlewares/auth";
 import { UserTokenService } from "../infrastructure/services/jwt/user-token-service";
 import { HostTokenService } from "../infrastructure/services/jwt/host-token-service";
+import { FileRouter } from "../infrastructure/web/v1/routes/file-routes";
+import { FileController } from "../infrastructure/web/v1/controllers/file-controller";
+import { FileUploader } from "./multer";
 
 export class DiContainer {
   private static instance: DiContainer;
   private userRoutes: UserRouter;
   private authRoutes: AuthRouter;
   private hostRoutes: HostRouter;
+  private fileRoutes: FileRouter;
 
   private constructor() {
     const prisma = new PrismaClient();
@@ -83,17 +87,24 @@ export class DiContainer {
       hostLoginUseCase,
       getHostUseCase
     );
+    const fileController = new FileController();
 
     // Middleware
     const authMiddleware = new AuthMiddleware(
       hostTokenServiceRepository,
       userTokenServiceRepository
     );
+    const fileUploader = new FileUploader();
 
     // Routers
     this.userRoutes = new UserRouter(userController, authMiddleware);
     this.authRoutes = new AuthRouter(authController, authMiddleware);
     this.hostRoutes = new HostRouter(hostController, authMiddleware);
+    this.fileRoutes = new FileRouter(
+      authMiddleware,
+      fileController,
+      fileUploader
+    );
   }
 
   public static getInstance(): DiContainer {
@@ -113,5 +124,9 @@ export class DiContainer {
 
   public getHostRoutes(): HostRouter {
     return this.hostRoutes;
+  }
+
+  public getFileRoutes(): FileRouter {
+    return this.fileRoutes;
   }
 }

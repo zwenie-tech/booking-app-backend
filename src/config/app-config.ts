@@ -27,6 +27,7 @@ export class App {
     this.app.use("/api/v1", this.diContainer.getAuthRoutes().getRouter());
     this.app.use("/api/v1/users", this.diContainer.getUserRoutes().getRouter());
     this.app.use("/api/v1/hosts", this.diContainer.getHostRoutes().getRouter());
+    this.app.use("/api/v1/s3", this.diContainer.getFileRoutes().getRouter());
   }
 
   private configureErrorHandling(): void {
