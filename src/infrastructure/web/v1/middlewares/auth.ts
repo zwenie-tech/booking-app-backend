@@ -22,8 +22,27 @@ export class AuthMiddleware {
     res: Response,
     next: NextFunction
   ): Promise<void> {
+    const cookieToken = req.cookies.token; // if token in cookie ? take token from cookie : else take token from header |
     const { authorization } = req.headers;
-    if (authorization) {
+    if (cookieToken) {
+      try {
+        const result = await this.hostTokenService.verifyAccessToken(
+          cookieToken
+        );
+        if (result) {
+          req.hostId = result;
+          next();
+        } else {
+          res.status(403).json({
+            success: false,
+            message: "Unauthorized access",
+          });
+        }
+      } catch (error) {
+        res.status(403);
+        next(error);
+      }
+    } else if (authorization) {
       try {
         const token = authorization.replace("Bearer ", "");
         const result = await this.hostTokenService.verifyAccessToken(token);
@@ -53,8 +72,27 @@ export class AuthMiddleware {
     res: Response,
     next: NextFunction
   ): Promise<void> {
+    const cookieToken = req.cookies.token; // if token in cookie ? take token from cookie : else take token from header |
     const { authorization } = req.headers;
-    if (authorization) {
+    if (cookieToken) {
+      try {
+        const result = await this.userTokenService.verifyAccessToken(
+          cookieToken
+        );
+        if (result) {
+          req.hostId = result;
+          next();
+        } else {
+          res.status(403).json({
+            success: false,
+            message: "Unauthorized access",
+          });
+        }
+      } catch (error) {
+        res.status(403);
+        next(error);
+      }
+    } else if (authorization) {
       try {
         const token = authorization.replace("Bearer ", "");
         const result = await this.userTokenService.verifyAccessToken(token);

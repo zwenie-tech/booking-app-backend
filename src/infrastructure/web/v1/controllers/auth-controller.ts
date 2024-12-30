@@ -42,6 +42,11 @@ export class AuthController {
             if (isMatch) {
               try {
                 const token = await this.userLoginUseCase.execute(user.id);
+                res.cookie('token', token?.accessToken, {
+                  httpOnly: true,
+                  secure: true,
+                  maxAge: 7 * 60 * 1000
+                });
                 res.status(200).json({
                   message: "You have successfully logged in.",
                   success: true,
@@ -167,6 +172,11 @@ export class AuthController {
             if (isMatch) {
               try {
                 const token = await this.hostLoginUseCase.execute(user.id);
+                res.cookie('token', token?.accessToken, {
+                  httpOnly: true,
+                  secure: true,
+                  maxAge: 7 * 60 * 1000
+                });
                 res.status(200).json({
                   success: true,
                   message: "You have successfully logged in.",

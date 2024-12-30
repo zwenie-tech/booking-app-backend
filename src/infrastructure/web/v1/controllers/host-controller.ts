@@ -40,6 +40,11 @@ export class HostController {
           if (user) {
             try {
               const token = await this.hostLoginUseCase.execute(user.id);
+              res.cookie('token', token?.accessToken, {
+                httpOnly: true,
+                secure: true,
+                maxAge: 7 * 60 * 1000
+              });
               res.status(201).json({
                 success: true,
                 data: {
@@ -84,6 +89,7 @@ export class HostController {
           success: true,
           data: {
             hostId : host.id,
+            orgId : host.orgId,
             firstName : host.firstName,
             lastName: host.lastName,
             email: host.email,
