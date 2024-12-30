@@ -39,6 +39,11 @@ export class UserController {
           if (user) {
             try {
               const token = await this.userLoginUseCase.execute(user.id);
+              res.cookie("token", token?.accessToken, {
+                httpOnly: true,
+                secure: true,
+                maxAge: 7 * 60 * 1000,
+              });
               res.status(201).json({
                 success: true,
                 data: {
@@ -76,27 +81,27 @@ export class UserController {
     res: AppResponse,
     next: NextFunction
   ): Promise<void> {
-    try{
+    try {
       const user = await this.getUserUseCase.execute(res.userId!);
-      if(user) {
+      if (user) {
         res.status(200).json({
-          success : true,
+          success: true,
           data: {
             userId: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
             phone: user.phone,
-            profile: user.profile
-          }
-        })
-      }else {
+            profile: user.profile,
+          },
+        });
+      } else {
         res.status(402).json({
           success: false,
-          message: "User not found with id"
-        })
+          message: "User not found with id",
+        });
       }
-    }catch(error) {
+    } catch (error) {
       res.status(403);
       next(error);
     }

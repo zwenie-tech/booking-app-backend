@@ -8,4 +8,5 @@ export interface HostRepository {
   findAll(): Promise<Host[] | null>;
   findByUsername(username: string): Promise<Host | null>;
   findByCredentials(username: string, password: string): Promise<Host | null>;
+  updateOrgById(orgId: number, hostId: number): Promise<Host | null>;
 }

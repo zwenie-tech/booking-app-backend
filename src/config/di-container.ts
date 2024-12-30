@@ -27,6 +27,11 @@ import { FileController } from "../infrastructure/web/v1/controllers/file-contro
 import { FileUploader } from "./multer";
 import { UploadFileUseCase } from "../application/use-cases/storage/upload-file";
 import { S3ObjectStoreService } from "../infrastructure/storage/s3-storage";
+import { OrganizerRoutes } from "../infrastructure/web/v1/routes/organizer-routes";
+import { PrismaOrganizerRepository } from "../infrastructure/database/prisma/repositories/prisma-organizer-repository";
+import { CreateOrganizationUseCase } from "../application/use-cases/organizer/create-organizer";
+import { OrganizerController } from "../infrastructure/web/v1/controllers/organizer-controller";
+import { UpdateHostUseCase } from "../application/use-cases/host/update-host";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -34,6 +39,7 @@ export class DiContainer {
   private authRoutes: AuthRouter;
   private hostRoutes: HostRouter;
   private fileRoutes: FileRouter;
+  private organizerRoutes: OrganizerRoutes;
 
   private constructor() {
     const prisma = new PrismaClient();
@@ -43,6 +49,7 @@ export class DiContainer {
     const hostRepository = new PrismaHostRepository(prisma);
     const hostTokenRepository = new PrismaHostTokenRepository(prisma);
     const userTokenRepository = new PrismaUserTokenRepository(prisma);
+    const organizerRepository = new PrismaOrganizerRepository(prisma);
 
     // Service repository
     const userTokenServiceRepository = new UserTokenService(
@@ -52,8 +59,8 @@ export class DiContainer {
       hostTokenRepository
     );
 
-    // Storage repository 
-    const storageRepository = new S3ObjectStoreService()
+    // Storage repository
+    const storageRepository = new S3ObjectStoreService();
 
     // Use cases
     const createUserUseCase = new CreateUserUseCase(userRepository);
@@ -71,6 +78,10 @@ export class DiContainer {
       hostTokenServiceRepository
     );
     const fileUploadUseCase = new UploadFileUseCase(storageRepository);
+    const createOrganizerUseCase = new CreateOrganizationUseCase(
+      organizerRepository
+    );
+    const updateHostUseCase = new UpdateHostUseCase(hostRepository);
 
     // Controllers
     const userController = new UserController(
@@ -94,6 +105,7 @@ export class DiContainer {
       getHostUseCase
     );
     const fileController = new FileController(fileUploadUseCase);
+    const organizerController = new OrganizerController(createOrganizerUseCase, updateHostUseCase);
 
     // Middleware
     const authMiddleware = new AuthMiddleware(
@@ -110,6 +122,10 @@ export class DiContainer {
       authMiddleware,
       fileController,
       fileUploader
+    );
+    this.organizerRoutes = new OrganizerRoutes(
+      organizerController,
+      authMiddleware
     );
   }
 
@@ -134,5 +150,9 @@ export class DiContainer {
 
   public getFileRoutes(): FileRouter {
     return this.fileRoutes;
+  }
+
+  public getOrganizerRoutes(): OrganizerRoutes{
+    return this.organizerRoutes;
   }
 }

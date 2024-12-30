@@ -151,4 +151,33 @@ export class PrismaHostRepository implements HostRepository {
       return result;
     }
   }
+
+  async updateOrgById(orgId: number, hostId: number): Promise<Host | null> {
+    const host = await this.prisma.host.update({
+      where: {
+        id: hostId,
+      },
+      data: {
+        org_id: orgId,
+      },
+    });
+    if (host) {
+      return new Host(
+        host.id,
+        host.firstName,
+        host.lastName,
+        host.email,
+        host.phone,
+        host.profile,
+        host.org_id!,
+        host.role,
+        host.isDeleted,
+        host.deletedDate,
+        host.password,
+        host.createdAt
+      );
+    } else {
+      return null;
+    }
+  }
 }
