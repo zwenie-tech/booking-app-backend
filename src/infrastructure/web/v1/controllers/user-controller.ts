@@ -53,7 +53,7 @@ export class UserController {
                 },
               });
             } catch (err) {
-              res.status(301);
+              res.status(500);
               next(err);
             }
           } else {
@@ -63,7 +63,7 @@ export class UserController {
             });
           }
         } catch (error: any) {
-          res.status(400);
+          res.status(503);
           next(error);
         }
     } else {
@@ -96,13 +96,13 @@ export class UserController {
           },
         });
       } else {
-        res.status(402).json({
+        res.status(404).json({
           success: false,
           message: "User not found with id",
         });
       }
     } catch (error) {
-      res.status(403);
+      res.status(503);
       next(error);
     }
   }

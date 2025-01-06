@@ -55,7 +55,7 @@ export class HostController {
                 },
               });
             } catch (err) {
-              res.status(302);
+              res.status(500);
               next(err);
             }
           } else {
@@ -65,7 +65,7 @@ export class HostController {
             });
           }
         } catch (error: any) {
-          res.status(400);
+          res.status(503);
           next(error);
         }
     } else {
@@ -99,13 +99,13 @@ export class HostController {
           }
         })
       } else {
-        res.status(402).json({
+        res.status(404).json({
           success: false,
-          message: "Host not found with id"
+          message: "Host not found with id."
         })
       }
     }catch(error) {
-      res.status(403);
+      res.status(503);
       next(error)
     }
   }

@@ -16,6 +16,7 @@ export class OrganizerController {
     next: NextFunction
   ): Promise<void> {
     const hostId = req.hostId;
+    const orgId = req.orgId;
     const { name, address, about, website, logo, facebook, instagram, x } =
       req.body;
     const result = OrganizerRegisterValidate.safeParse({
@@ -29,51 +30,61 @@ export class OrganizerController {
       x,
     });
     if (result.success) {
-      try {
-        const org = await this.createOrganizerUseCase.execute(
-          name,
-          address,
-          website,
-          logo,
-          about,
-          facebook,
-          instagram,
-          x
-        );
-        if (org) {
-          try {
-            const host = await this.updateHostUseCase.execute(hostId!, org.id);
-            if (host) {
-              res.status(201).json({
-                success: true,
-                message: "org created successfully.",
-                data: {
-                  hostId: host.id,
-                  orgId: org.id,
-                  name: org.name,
-                  address: org.address,
-                  about: org.about,
-                },
-              });
-            } else {
-              res.status(403).json({
-                success: false,
-                message: "Host update failed.",
-              });
+      if (!orgId) {
+        try {
+          const org = await this.createOrganizerUseCase.execute(
+            name,
+            address,
+            website,
+            logo,
+            about,
+            facebook,
+            instagram,
+            x
+          );
+          if (org) {
+            try {
+              const host = await this.updateHostUseCase.execute(
+                hostId!,
+                org.id
+              );
+              if (host) {
+                res.status(201).json({
+                  success: true,
+                  message: "org created successfully.",
+                  data: {
+                    hostId: host.id,
+                    orgId: org.id,
+                    name: org.name,
+                    address: org.address,
+                    about: org.about,
+                  },
+                });
+              } else {
+                res.status(403).json({
+                  success: false,
+                  message: "Host update failed.",
+                });
+              }
+            } catch (error) {
+              res.status(403);
+              next(error);
             }
-          } catch (error) {
-            res.status(403);
-            next(error);
+          } else {
+            res.status(400).json({
+              success: false,
+              message: "Org creation failed.",
+            });
           }
-        } else {
-          res.status(400).json({
-            success: false,
-            message: "Org creation failed.",
-          });
+        } catch (error) {
+          res.status(403);
+          next(error);
         }
-      } catch (error) {
-        res.status(403);
-        next(error);
+      } else {
+        res.status(409).json({
+          success: false,
+          message: "Organization already exist with this host.",
+        });
       }
     } else {
       const formattedErrors = util.handleValidationError(result.error);

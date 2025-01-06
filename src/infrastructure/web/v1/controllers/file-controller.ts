@@ -32,17 +32,17 @@ export class FileController {
             },
           });
         } catch (error) {
-          res.status(403);
+          res.status(503);
           next(error);
         }
       } else {
-        res.status(200).json({
-          test: "bad.",
+        res.status(400).json({
+          message: "Validation failed.",
           Error: result.error,
         });
       }
     } else {
-      res.status(403).json({
+      res.status(400).json({
         success: false,
         message: "File not found.",
       });

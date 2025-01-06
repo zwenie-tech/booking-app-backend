@@ -34,13 +34,13 @@ export class AuthMiddleware {
           req.orgId = result.orgId;
           next();
         } else {
-          res.status(403).json({
+          res.status(401).json({
             success: false,
             message: "Unauthorized access",
           });
         }
       } catch (error) {
-        res.status(403);
+        res.status(500);
         next(error);
       }
     } else if (authorization) {
@@ -52,19 +52,19 @@ export class AuthMiddleware {
           req.orgId = result.orgId;
           next();
         } else {
-          res.status(403).json({
+          res.status(401).json({
             success: false,
             message: "Unauthorized access",
           });
         }
       } catch (error) {
-        res.status(400);
+        res.status(500);
         next(error);
       }
     } else {
       res.status(401).json({
         success: false,
-        message: "auth header not found",
+        message: "Authorization header not found",
       });
     }
   }
@@ -85,13 +85,13 @@ export class AuthMiddleware {
           req.hostId = result;
           next();
         } else {
-          res.status(403).json({
+          res.status(401).json({
             success: false,
             message: "Unauthorized access",
           });
         }
       } catch (error) {
-        res.status(403);
+        res.status(500);
         next(error);
       }
     } else if (authorization) {
@@ -102,19 +102,19 @@ export class AuthMiddleware {
           req.userId = result;
           next();
         } else {
-          res.status(403).json({
+          res.status(401).json({
             success: false,
             message: "Unauthorized access",
           });
         }
       } catch (error) {
-        res.status(400);
+        res.status(500);
         next(error);
       }
     } else {
       res.status(401).json({
         success: false,
-        message: "auth header not found",
+        message: "Authorization header not found",
       });
     }
   }
