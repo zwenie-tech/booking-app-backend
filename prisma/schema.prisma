@@ -13,6 +13,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EventType {
+  public
+  private
+  inviteOnly
+}
+
+enum EventStatus {
+  draft
+  published
+  cancelled
+}
+
+enum EventMode {
+  online
+  offline
+}
+
 model User {
   id            Int             @id  @default(autoincrement())
   firstName     String
@@ -75,6 +92,78 @@ model Organizer {
   instagram     String?
   twitter       String?
   hosts         Host[]
+  events        Event[]
   updatedAt     DateTime        @updatedAt
   createdAt     DateTime        @default(now())
+}
+
+model Event {
+  id               Int            @id @default(autoincrement())
+  orgId            Int
+  name             String
+  shortDescription String
+  startDate        DateTime
+  endDate          DateTime
+  type             EventType      @default(public)
+  status           EventStatus    @default(draft)
+  mode             EventMode      @default(offline)
+  category         String
+  subCategory      String
+  description      String
+  location         String
+  address          String
+  meetLink         String?
+  artists          Artist[]
+  tickets          Ticket[]
+  coverPhoto       String?
+  brochure1        String?
+  brochure2        String?
+  brochure3        String?
+  brochure4        String?
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+  organizer        Organizer       @relation(fields: [orgId], references: [id])
+}
+
+model Artist {
+  id               Int             @id @default(autoincrement())
+  name             String
+  eventId          Int
+  tag              String
+  profile          String?
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+  event            Event           @relation(fields: [eventId], references: [id])
+}
+
+model Ticket {
+  id               Int             @id @default(autoincrement())
+  eventId          Int
+  name             String
+  price            Float
+  isLimited        Boolean         @default(true)
+  totalSeat        Int?
+  salesStartDate   DateTime
+  salesEndDate     DateTime
+  message          String
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+  event            Event           @relation(fields: [eventId], references: [id])
+}
+
+model Category {
+  id               Int @id @default(autoincrement())
+  name             String
+  subCategory      SubCategory[]
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+}
+
+model SubCategory {
+  id               Int             @id @default(autoincrement())
+  name             String
+  categoryId       Int
+  category         Category        @relation(fields: [categoryId], references: [id])
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
 }
