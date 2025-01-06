@@ -187,3 +187,127 @@ export interface ITokenService {
   // .env configuration example
   // ACCESS_TOKEN_SECRET=your_very_long_and_secure_random_string
   // REFRESH_TOKEN_SECRET=another_different_very_long_and_secure_random_string
+
+// nodemailer template 
+const nodemailer = require('nodemailer');
+
+// Create transporter (configure with your email service)
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // or your email service
+    auth: {
+        user: 'your-email@gmail.com',
+        pass: 'your-app-specific-password'
+    }
+});
+
+// Function to generate OTP
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000);
+}
+
+// Function to send OTP email
+async function sendOTPEmail(userEmail) {
+    const otp = generateOTP();
+    
+    // Email HTML template
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Password Reset OTP</title>
+            <style>
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    font-family: Arial, sans-serif;
+                }
+                .header {
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 20px;
+                    text-align: center;
+                    border-radius: 5px 5px 0 0;
+                }
+                .content {
+                    background-color: #f9f9f9;
+                    padding: 20px;
+                    border: 1px solid #ddd;
+                    border-radius: 0 0 5px 5px;
+                }
+                .otp-container {
+                    text-align: center;
+                    padding: 20px;
+                    margin: 20px 0;
+                    background-color: #ffffff;
+                    border: 2px dashed #4CAF50;
+                    border-radius: 5px;
+                }
+                .otp-code {
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #4CAF50;
+                    letter-spacing: 5px;
+                }
+                .footer {
+                    text-align: center;
+                    margin-top: 20px;
+                    color: #666;
+                    font-size: 12px;
+                }
+                .warning {
+                    color: #ff4444;
+                    font-size: 14px;
+                    margin-top: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Password Reset Request</h1>
+                </div>
+                <div class="content">
+                    <p>Hello,</p>
+                    <p>We received a request to reset your password. Please use the following OTP (One-Time Password) to proceed with your password reset:</p>
+                    
+                    <div class="otp-container">
+                        <div class="otp-code">${otp}</div>
+                    </div>
+                    
+                    <p>This OTP will expire in 10 minutes for security reasons.</p>
+                    
+                    <p class="warning">If you didn't request this password reset, please ignore this email or contact support if you have concerns.</p>
+                    
+                    <div class="footer">
+                        <p>This is an automated message, please do not reply to this email.</p>
+                        <p>&copy; ${new Date().getFullYear()} Your Company Name. All rights reserved.</p>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    // Email options
+    const mailOptions = {
+        from: 'your-email@gmail.com',
+        to: userEmail,
+        subject: 'Password Reset OTP',
+        html: htmlContent
+    };
+
+    try {
+        // Send email
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent: ' + info.response);
+        return { success: true, otp };
+    } catch (error) {
+        console.error('Error sending email:', error);
+        throw error;
+    }
+}
+
+// Example usage
+module.exports = sendOTPEmail;
