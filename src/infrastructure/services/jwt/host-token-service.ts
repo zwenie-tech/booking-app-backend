@@ -6,7 +6,11 @@ import { HostToken } from "../../../domain/entities/host-token.entitiy";
 export class HostTokenService implements HostTokenServiceRepository {
   constructor(private tokenRepository: HostTokenRepository) {}
 
-  private generateToken(userId: number, type: "access" | "refresh"): string {
+  private generateToken(
+    userId: number,
+    orgId: number,
+    type: "access" | "refresh"
+  ): string {
     const secret =
       type === "access"
         ? process.env.ACCESS_TOKEN_SECRET_HOST!
@@ -17,45 +21,57 @@ export class HostTokenService implements HostTokenServiceRepository {
         ? process.env.ACCESS_TOKEN_EXPIRES!
         : process.env.REFRESH_TOKEN_EXPIRES!;
 
-    return jwt.sign({ userId }, secret, { expiresIn });
+    return jwt.sign({ userId, orgId }, secret, { expiresIn });
   }
 
-  async generateAccessToken(hostId: number): Promise<string> {
-    return this.generateToken(hostId, "access");
+  async generateAccessToken(hostId: number, orgId: number): Promise<string> {
+    return this.generateToken(hostId, orgId, "access");
   }
 
-  async generateRefreshToken(hostToken: HostToken): Promise<string> {
-    const token = this.generateToken(hostToken.hostId, "refresh");
+  async generateRefreshToken(
+    hostId: number,
+    orgId: number
+  ): Promise<string> {
+    // const decoded = await this.verifyRefreshToken(hostToken.token); // can i use this before this stage? or change something else?
+    const token = this.generateToken(hostId,orgId, "refresh");
     const result = await this.tokenRepository.storeRefreshToken(
       new HostToken(
-        hostToken.id,
-        hostToken.hostId,
+        0,
+        hostId,
         token,
-        hostToken.createdAt,
-        hostToken.expiresAt
+        new Date(),
+        new Date()
       )
     );
 
     return result.token;
   }
 
-  async verifyAccessToken(token: string): Promise<number | null> {
+  async verifyAccessToken(token: string): Promise<{ userId: number; orgId: number; } | null> {
     try {
-      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_HOST!) as {
+      const decoded = jwt.verify(
+        token,
+        process.env.ACCESS_TOKEN_SECRET_HOST!
+      ) as {
         userId: number;
+        orgId: number;
       };
-      return decoded.userId;
+      return decoded;
     } catch {
       return null;
     }
   }
 
-  async verifyRefreshToken(token: string): Promise<number | null> {
+  async verifyRefreshToken(token: string): Promise<{ userId: number; orgId: number; } | null> {
     try {
-      const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET_HOST!) as {
+      const decoded = jwt.verify(
+        token,
+        process.env.REFRESH_TOKEN_SECRET_HOST!
+      ) as {
         userId: number;
+        orgId: number;
       };
-      return decoded.userId;
+      return decoded;
     } catch {
       return null;
     }

@@ -39,7 +39,7 @@ export class HostController {
           );
           if (user) {
             try {
-              const token = await this.hostLoginUseCase.execute(user.id);
+              const token = await this.hostLoginUseCase.execute(user.id, user.orgId);
               res.cookie('token', token?.accessToken, {
                 httpOnly: true,
                 secure: true,
@@ -49,6 +49,7 @@ export class HostController {
                 success: true,
                 data: {
                   userId: user.id,
+                  orgId : user.orgId,
                   accessToken: token?.accessToken,
                   refreshToken: token?.refreshToken,
                 },

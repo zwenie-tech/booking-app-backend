@@ -1,9 +1,11 @@
-import { HostToken } from "../entities/host-token.entitiy";
-
 export interface HostTokenServiceRepository {
-  generateAccessToken(hostId: number): Promise<string>;
-  generateRefreshToken(hostToken: HostToken): Promise<string>;
-  verifyAccessToken(token: string): Promise<number | null>;
-  verifyRefreshToken(token: string): Promise<number | null>;
+  generateAccessToken(hostId: number, orgId: number): Promise<string>;
+  generateRefreshToken(hostId: number, orgId: number): Promise<string>;
+  verifyAccessToken(
+    token: string
+  ): Promise<{ userId: number; orgId: number } | null>;
+  verifyRefreshToken(
+    token: string
+  ): Promise<{ userId: number; orgId: number } | null>;
   revokeRefreshToken(userId: number): Promise<boolean>;
 }

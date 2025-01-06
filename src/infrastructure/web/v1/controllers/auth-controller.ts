@@ -171,7 +171,7 @@ export class AuthController {
             const isMatch = await util.compareHash(password, user.password);
             if (isMatch) {
               try {
-                const token = await this.hostLoginUseCase.execute(user.id);
+                const token = await this.hostLoginUseCase.execute(user.id, user.orgId);
                 res.cookie('token', token?.accessToken, {
                   httpOnly: true,
                   secure: true,
@@ -182,6 +182,7 @@ export class AuthController {
                   message: "You have successfully logged in.",
                   data: {
                     hostId: user.id,
+                    orgId: user.orgId,
                     accessToken: token?.accessToken,
                     refreshToken: token?.refreshToken,
                   },

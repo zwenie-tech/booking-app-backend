@@ -30,7 +30,8 @@ export class AuthMiddleware {
           cookieToken
         );
         if (result) {
-          req.hostId = result;
+          req.hostId = result.userId;
+          req.orgId = result.orgId;
           next();
         } else {
           res.status(403).json({
@@ -47,7 +48,8 @@ export class AuthMiddleware {
         const token = authorization.replace("Bearer ", "");
         const result = await this.hostTokenService.verifyAccessToken(token);
         if (result) {
-          req.hostId = result;
+          req.hostId = result.userId;
+          req.orgId = result.orgId;
           next();
         } else {
           res.status(403).json({
