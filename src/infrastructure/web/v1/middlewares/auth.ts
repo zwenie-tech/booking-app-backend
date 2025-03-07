@@ -22,7 +22,7 @@ export class AuthMiddleware {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const cookieToken = req.cookies.token; // if token in cookie ? take token from cookie : else take token from header |
+    const cookieToken = req.cookies.token;
     const { authorization } = req.headers;
     if (cookieToken) {
       try {

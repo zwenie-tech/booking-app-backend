@@ -6,6 +6,7 @@ export class User {
     public readonly email: string,
     public readonly phone: string,
     public readonly profile: string | null,
+    public readonly isVerified: boolean,
     public readonly isDeleted: boolean,
     public readonly deletedDate: Date | null,
     public readonly password: string,

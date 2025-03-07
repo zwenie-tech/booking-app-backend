@@ -35,11 +35,12 @@ model User {
   firstName     String
   lastName      String?
   email         String          @unique
-  phone         String          @unique
+  phone         String?         @unique
   profile       String?
   password      String
   isDeleted     Boolean         @default(false)
   deletedDate   DateTime?
+  isVerified    Boolean         @default(false)
   createAt      DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   refreshTokens RefreshToken[]
@@ -59,13 +60,14 @@ model Host {
   firstName     String
   lastName      String?
   email         String          @unique
-  phone         String          @unique
+  phone         String?         @unique
   profile       String?
   org_id        Int?
   role          String          @default("admin")
   isDeleted     Boolean         @default(false)
   deletedDate   DateTime?
   password      String
+  isVerified    Boolean         @default(false)
   updatedAt     DateTime        @updatedAt
   createdAt     DateTime        @default(now())
   refreshTokens RefreshTokenHost[]
@@ -155,6 +157,7 @@ model Category {
   id               Int @id @default(autoincrement())
   name             String
   subCategory      SubCategory[]
+  iconUrl          String
   updatedAt        DateTime        @updatedAt
   createdAt        DateTime        @default(now())
 }

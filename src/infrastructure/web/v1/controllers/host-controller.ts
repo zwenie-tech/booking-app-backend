@@ -39,17 +39,21 @@ export class HostController {
           );
           if (user) {
             try {
-              const token = await this.hostLoginUseCase.execute(user.id, user.orgId);
-              res.cookie('token', token?.accessToken, {
+              const token = await this.hostLoginUseCase.execute(
+                user.id,
+                user.orgId
+              );
+              res.cookie("token", token?.accessToken, {
                 httpOnly: true,
                 secure: true,
-                maxAge: 7 * 60 * 1000
+                maxAge: 7 * 60 * 1000,
               });
               res.status(201).json({
                 success: true,
                 data: {
                   userId: user.id,
-                  orgId : user.orgId,
+                  orgId: user.orgId,
+                  isVerified: user.isVerified,
                   accessToken: token?.accessToken,
                   refreshToken: token?.refreshToken,
                 },
@@ -83,30 +87,31 @@ export class HostController {
     res: AppResponse,
     next: NextFunction
   ): Promise<void> {
-    try{
+    try {
       const host = await this.getHostUseCase.execute(res.hostId!);
-      if(host) {
+      if (host) {
         res.status(200).json({
           success: true,
           data: {
-            hostId : host.id,
-            orgId : host.orgId,
-            firstName : host.firstName,
+            hostId: host.id,
+            orgId: host.orgId,
+            firstName: host.firstName,
             lastName: host.lastName,
             email: host.email,
             phone: host.phone,
-            profile: host.profile
-          }
-        })
+            profile: host.profile,
+            isVerified: host.isVerified,
+          },
+        });
       } else {
         res.status(404).json({
           success: false,
-          message: "Host not found with id."
-        })
+          message: "Host not found with id.",
+        });
       }
-    }catch(error) {
+    } catch (error) {
       res.status(503);
-      next(error)
+      next(error);
     }
   }
 }

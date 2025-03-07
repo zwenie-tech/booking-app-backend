@@ -32,6 +32,9 @@ import { PrismaOrganizerRepository } from "../infrastructure/database/prisma/rep
 import { CreateOrganizationUseCase } from "../application/use-cases/organizer/create-organizer";
 import { OrganizerController } from "../infrastructure/web/v1/controllers/organizer-controller";
 import { UpdateHostUseCase } from "../application/use-cases/host/update-host";
+import { AuthByGoogleUseCase } from "../application/use-cases/auth/common/auth-by-google";
+import { GoogleAuthService } from "../infrastructure/services/google/google-auth-service";
+import { OAuth2Client } from "google-auth-library";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -43,6 +46,7 @@ export class DiContainer {
 
   private constructor() {
     const prisma = new PrismaClient();
+    const oauth2Client = new OAuth2Client();
 
     // Prisma Repositories
     const userRepository = new PrismaUserRepository(prisma);
@@ -58,6 +62,7 @@ export class DiContainer {
     const hostTokenServiceRepository = new HostTokenService(
       hostTokenRepository
     );
+    const oauthRepository = new GoogleAuthService(oauth2Client);
 
     // Storage repository
     const storageRepository = new S3ObjectStoreService();
@@ -82,6 +87,7 @@ export class DiContainer {
       organizerRepository
     );
     const updateHostUseCase = new UpdateHostUseCase(hostRepository);
+    const authByGoogleUseCase = new AuthByGoogleUseCase(oauthRepository);
 
     // Controllers
     const userController = new UserController(
@@ -97,7 +103,8 @@ export class DiContainer {
       getHostUseCase,
       hostLoginUseCase,
       hostLogoutUseCase,
-      hostRefreshTokenUseCase
+      hostRefreshTokenUseCase,
+      authByGoogleUseCase
     );
     const hostController = new HostController(
       createHostUseCase,
@@ -105,7 +112,10 @@ export class DiContainer {
       getHostUseCase
     );
     const fileController = new FileController(fileUploadUseCase);
-    const organizerController = new OrganizerController(createOrganizerUseCase, updateHostUseCase);
+    const organizerController = new OrganizerController(
+      createOrganizerUseCase,
+      updateHostUseCase
+    );
 
     // Middleware
     const authMiddleware = new AuthMiddleware(
@@ -152,7 +162,7 @@ export class DiContainer {
     return this.fileRoutes;
   }
 
-  public getOrganizerRoutes(): OrganizerRoutes{
+  public getOrganizerRoutes(): OrganizerRoutes {
     return this.organizerRoutes;
   }
 }

@@ -13,6 +13,7 @@ import { UserLoginUseCase } from "../../../../application/use-cases/auth/user/us
 import { UserLogoutUseCase } from "../../../../application/use-cases/auth/user/user-logout";
 import { UserAccessTokenUseCase } from "../../../../application/use-cases/auth/user/user-access-token";
 import { AppResponse } from "../../../../shared/types";
+import { AuthByGoogleUseCase } from "../../../../application/use-cases/auth/common/auth-by-google";
 
 export class AuthController {
   constructor(
@@ -23,7 +24,8 @@ export class AuthController {
     private getHostUseCase: GetHostUseCase,
     private hostLoginUseCase: HostLoginUseCase,
     private hostLogoutUseCase: HostLogoutUseCase,
-    private hostRefreshTokenUseCase: HostRefreshTokenUseCase
+    private hostRefreshTokenUseCase: HostRefreshTokenUseCase,
+    private authByGoogleUseCase: AuthByGoogleUseCase
   ) {}
 
   async loginUser(
@@ -52,6 +54,7 @@ export class AuthController {
                   success: true,
                   data: {
                     userId: user.id,
+                    isVerified: user.isVerified,
                     accessToken: token?.accessToken,
                     refreshToken: token?.refreshToken,
                   },
@@ -185,6 +188,7 @@ export class AuthController {
                   data: {
                     hostId: user.id,
                     orgId: user.orgId,
+                    isVerified: user.isVerified,
                     accessToken: token?.accessToken,
                     refreshToken: token?.refreshToken,
                   },
