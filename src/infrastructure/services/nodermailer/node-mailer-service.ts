@@ -1,6 +1,6 @@
 import Mail from "nodemailer/lib/mailer";
 import { EMailRepository } from "../../../domain/repositories/email-repository.interface";
-import nodemailer, { SentMessageInfo, TransportOptions } from "nodemailer";
+import nodemailer, { SentMessageInfo } from "nodemailer";
 
 export class NodeMailerService implements EMailRepository {
   private transporter: Mail<SentMessageInfo>;
