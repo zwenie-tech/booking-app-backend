@@ -35,6 +35,10 @@ import { UpdateHostUseCase } from "../application/use-cases/host/update-host";
 import { AuthByGoogleUseCase } from "../application/use-cases/auth/common/auth-by-google";
 import { GoogleAuthService } from "../infrastructure/services/google/google-auth-service";
 import { OAuth2Client } from "google-auth-library";
+import { CategoryRouter } from "../infrastructure/web/v1/routes/category-routes";
+import { PrismaCategoryRepository } from "../infrastructure/database/prisma/repositories/prisma-category-repository";
+import { GetCategoryUseCase } from "../application/use-cases/category/get-category";
+import { CategoryController } from "../infrastructure/web/v1/controllers/category-controller";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -43,6 +47,7 @@ export class DiContainer {
   private hostRoutes: HostRouter;
   private fileRoutes: FileRouter;
   private organizerRoutes: OrganizerRoutes;
+  private categoryRoutes: CategoryRouter;
 
   private constructor() {
     const prisma = new PrismaClient();
@@ -54,6 +59,7 @@ export class DiContainer {
     const hostTokenRepository = new PrismaHostTokenRepository(prisma);
     const userTokenRepository = new PrismaUserTokenRepository(prisma);
     const organizerRepository = new PrismaOrganizerRepository(prisma);
+    const categoryRepository = new PrismaCategoryRepository(prisma);
 
     // Service repository
     const userTokenServiceRepository = new UserTokenService(
@@ -88,6 +94,7 @@ export class DiContainer {
     );
     const updateHostUseCase = new UpdateHostUseCase(hostRepository);
     const authByGoogleUseCase = new AuthByGoogleUseCase(oauthRepository);
+    const getCategoryUseCase = new GetCategoryUseCase(categoryRepository);
 
     // Controllers
     const userController = new UserController(
@@ -116,6 +123,7 @@ export class DiContainer {
       createOrganizerUseCase,
       updateHostUseCase
     );
+    const categoryController = new CategoryController(getCategoryUseCase);
 
     // Middleware
     const authMiddleware = new AuthMiddleware(
@@ -137,6 +145,7 @@ export class DiContainer {
       organizerController,
       authMiddleware
     );
+    this.categoryRoutes = new CategoryRouter(categoryController);
   }
 
   public static getInstance(): DiContainer {
@@ -164,5 +173,9 @@ export class DiContainer {
 
   public getOrganizerRoutes(): OrganizerRoutes {
     return this.organizerRoutes;
+  }
+
+  public getCategoryRoutes(): CategoryRouter {
+    return this.categoryRoutes;
   }
 }

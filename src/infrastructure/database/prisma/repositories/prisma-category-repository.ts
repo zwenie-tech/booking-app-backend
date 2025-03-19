@@ -5,7 +5,11 @@ import { CategoryRepository } from "../../../../domain/repositories/category-rep
 export class PrismaCategoryRepository implements CategoryRepository {
   constructor(private prisma: PrismaClient) {}
   async findAll(): Promise<Category[] | null> {
-    const result: Category[] = await this.prisma.category.findMany();
+    const result = await this.prisma.category.findMany({
+      include: {
+        subCategory: true,
+      },
+    });
     return result;
   }
 }
