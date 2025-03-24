@@ -11,3 +11,20 @@ export interface AppResponse extends Response {
   userId?: number;
   orgId?: number;
 }
+
+export enum EventType {
+  public,
+  private,
+  inviteOnly,
+}
+
+export enum EventStatus {
+  draft,
+  published,
+  cancelled,
+}
+
+export enum EventMode {
+  online,
+  offline,
+}

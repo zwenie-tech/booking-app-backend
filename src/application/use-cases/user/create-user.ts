@@ -18,6 +18,7 @@ export class CreateUserUseCase {
       phone,
       "",
       false,
+      false,
       null,
       password,
       new Date()

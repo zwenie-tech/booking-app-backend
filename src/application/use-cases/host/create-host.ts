@@ -20,6 +20,7 @@ export class CreateHostUseCase {
       1,
       "admin",
       false,
+      false,
       new Date(),
       password,
       new Date()

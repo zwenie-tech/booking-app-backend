@@ -48,6 +48,7 @@ export class UserController {
                 success: true,
                 data: {
                   userId: user.id,
+                  isVerified: user.isVerified,
                   accessToken: token?.accessToken,
                   refreshToken: token?.refreshToken,
                 },
@@ -93,6 +94,7 @@ export class UserController {
             email: user.email,
             phone: user.phone,
             profile: user.profile,
+            isVerified: user.isVerified,
           },
         });
       } else {
