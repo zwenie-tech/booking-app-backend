@@ -13,6 +13,7 @@ import { UserLoginUseCase } from "../../../../application/use-cases/auth/user/us
 import { UserLogoutUseCase } from "../../../../application/use-cases/auth/user/user-logout";
 import { UserAccessTokenUseCase } from "../../../../application/use-cases/auth/user/user-access-token";
 import { AppResponse } from "../../../../shared/types";
+import { AuthByGoogleUseCase } from "../../../../application/use-cases/auth/common/auth-by-google";
 
 export class AuthController {
   constructor(
@@ -23,7 +24,8 @@ export class AuthController {
     private getHostUseCase: GetHostUseCase,
     private hostLoginUseCase: HostLoginUseCase,
     private hostLogoutUseCase: HostLogoutUseCase,
-    private hostRefreshTokenUseCase: HostRefreshTokenUseCase
+    private hostRefreshTokenUseCase: HostRefreshTokenUseCase,
+    private authByGoogleUseCase: AuthByGoogleUseCase
   ) {}
 
   async loginUser(
@@ -42,11 +44,17 @@ export class AuthController {
             if (isMatch) {
               try {
                 const token = await this.userLoginUseCase.execute(user.id);
+                res.cookie("token", token?.accessToken, {
+                  httpOnly: true,
+                  secure: true,
+                  maxAge: 7 * 60 * 1000,
+                });
                 res.status(200).json({
                   message: "You have successfully logged in.",
                   success: true,
                   data: {
                     userId: user.id,
+                    isVerified: user.isVerified,
                     accessToken: token?.accessToken,
                     refreshToken: token?.refreshToken,
                   },
@@ -56,13 +64,13 @@ export class AuthController {
                 next(err);
               }
             } else {
-              res.status(403).json({
+              res.status(401).json({
                 success: false,
                 message: "Invalid password",
               });
             }
           } catch (error) {
-            res.status(402);
+            res.status(500);
             next(error);
           }
         } else {
@@ -72,7 +80,7 @@ export class AuthController {
           });
         }
       } catch (error: any) {
-        res.status(400);
+        res.status(503);
         next(error);
       }
     } else {
@@ -97,7 +105,7 @@ export class AuthController {
         const accessToken = await this.userRefreshTokenUseCase.execute(
           refreshToken
         );
-        if(accessToken) {
+        if (accessToken) {
           res.status(200).json({
             success: true,
             message: "Your access token has been successfully regenerated",
@@ -109,17 +117,16 @@ export class AuthController {
         } else {
           res.status(403).json({
             success: false,
-            message: "Invalid refresh token."
-          })
+            message: "Invalid refresh token.",
+          });
         }
-        
       } catch (error) {
-        res.status(403);
+        res.status(500);
         next(error);
       }
     } else {
       const formattedErrors = util.handleValidationError(result.error);
-      res.status(403).json({
+      res.status(400).json({
         success: false,
         message: "Validation failed",
         errors: formattedErrors,
@@ -135,7 +142,7 @@ export class AuthController {
     try {
       const user = await this.userLogoutUseCase.execute(res.userId!);
       if (user) {
-        res.status(200).json({
+        res.status(204).json({
           success: true,
           message: "User logout",
         });
@@ -166,28 +173,38 @@ export class AuthController {
             const isMatch = await util.compareHash(password, user.password);
             if (isMatch) {
               try {
-                const token = await this.hostLoginUseCase.execute(user.id);
+                const token = await this.hostLoginUseCase.execute(
+                  user.id,
+                  user.orgId
+                );
+                res.cookie("token", token?.accessToken, {
+                  httpOnly: true,
+                  secure: true,
+                  maxAge: 7 * 60 * 1000,
+                });
                 res.status(200).json({
                   success: true,
                   message: "You have successfully logged in.",
                   data: {
                     hostId: user.id,
+                    orgId: user.orgId,
+                    isVerified: user.isVerified,
                     accessToken: token?.accessToken,
                     refreshToken: token?.refreshToken,
                   },
                 });
               } catch (error) {
-                res.status(402);
+                res.status(500);
                 next(error);
               }
             } else {
-              res.status(403).json({
+              res.status(401).json({
                 success: false,
                 message: "Invalid password",
               });
             }
           } catch (error) {
-            res.status(403);
+            res.status(500);
             next(error);
           }
         } else {
@@ -197,7 +214,7 @@ export class AuthController {
           });
         }
       } catch (error: any) {
-        res.status(400);
+        res.status(503);
         next(error);
       }
     } else {
@@ -222,7 +239,7 @@ export class AuthController {
         const accessToken = await this.hostRefreshTokenUseCase.execute(
           refreshToken
         );
-        if(accessToken) {
+        if (accessToken) {
           res.status(200).json({
             success: true,
             message: "Your access token has been successfully regenerated",
@@ -232,19 +249,18 @@ export class AuthController {
             },
           });
         } else {
-          res.status(403).json({
+          res.status(401).json({
             success: false,
-            message : "Invalid refresh token."
-          })
+            message: "Invalid refresh token.",
+          });
         }
-       
       } catch (error) {
-        res.status(401);
+        res.status(500);
         next(error);
       }
     } else {
       const formattedErrors = util.handleValidationError(result.error);
-      res.status(403).json({
+      res.status(400).json({
         success: false,
         message: "Validation failed",
         errors: formattedErrors,
@@ -261,13 +277,13 @@ export class AuthController {
       const host = await this.hostLogoutUseCase.execute(res.hostId!);
       if (host) {
       } else {
-        res.status(403).json({
+        res.status(401).json({
           success: false,
           message: "Invalid refresh token",
         });
       }
     } catch (error) {
-      res.status(402);
+      res.status(503);
       next(error);
     }
   }

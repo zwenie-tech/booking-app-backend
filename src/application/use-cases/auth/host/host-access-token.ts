@@ -3,10 +3,13 @@ import { HostTokenServiceRepository } from "../../../../domain/repositories/host
 export class HostRefreshTokenUseCase {
   constructor(private hostTokenService: HostTokenServiceRepository) {}
   async execute(refreshToken: string): Promise<string | null> {
-    const hostId = await this.hostTokenService.verifyRefreshToken(refreshToken);
-    if (hostId) {
+    const decoded = await this.hostTokenService.verifyRefreshToken(
+      refreshToken
+    );
+    if (decoded) {
       const accessToken = await this.hostTokenService.generateAccessToken(
-        hostId
+        decoded.userId,
+        decoded.orgId
       );
       return accessToken;
     } else {

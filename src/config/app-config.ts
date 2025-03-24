@@ -3,7 +3,7 @@ import helmet from "helmet";
 import cors from "cors";
 import { DiContainer } from "./di-container";
 import { middleware } from "../infrastructure/web/v1/middlewares/error-handle";
-import cookieParser  from 'cookie-parser';
+import cookieParser from "cookie-parser";
 
 export class App {
   private app: Application;
@@ -30,6 +30,9 @@ export class App {
     this.app.use("/api/v1/users", this.diContainer.getUserRoutes().getRouter());
     this.app.use("/api/v1/hosts", this.diContainer.getHostRoutes().getRouter());
     this.app.use("/api/v1/s3", this.diContainer.getFileRoutes().getRouter());
+    this.app.use("/api/v1/org",this.diContainer.getOrganizerRoutes().getRouter());
+    this.app.use("/api/v1/category", this.diContainer.getCategoryRoutes().getRouter());
+    this.app.use("/api/v1/event",this.diContainer.getEventRoutes().getRouter());
   }
 
   private configureErrorHandling(): void {

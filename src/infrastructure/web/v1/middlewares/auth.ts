@@ -22,28 +22,49 @@ export class AuthMiddleware {
     res: Response,
     next: NextFunction
   ): Promise<void> {
+    const cookieToken = req.cookies.token;
     const { authorization } = req.headers;
-    if (authorization) {
+    if (cookieToken) {
       try {
-        const token = authorization.replace("Bearer ", "");
-        const result = await this.hostTokenService.verifyAccessToken(token);
+        const result = await this.hostTokenService.verifyAccessToken(
+          cookieToken
+        );
         if (result) {
-          req.hostId = result;
+          req.hostId = result.userId;
+          req.orgId = result.orgId;
           next();
         } else {
-          res.status(403).json({
+          res.status(401).json({
             success: false,
             message: "Unauthorized access",
           });
         }
       } catch (error) {
-        res.status(400);
+        res.status(500);
+        next(error);
+      }
+    } else if (authorization) {
+      try {
+        const token = authorization.replace("Bearer ", "");
+        const result = await this.hostTokenService.verifyAccessToken(token);
+        if (result) {
+          req.hostId = result.userId;
+          req.orgId = result.orgId;
+          next();
+        } else {
+          res.status(401).json({
+            success: false,
+            message: "Unauthorized access",
+          });
+        }
+      } catch (error) {
+        res.status(500);
         next(error);
       }
     } else {
       res.status(401).json({
         success: false,
-        message: "auth header not found",
+        message: "Authorization header not found",
       });
     }
   }
@@ -53,8 +74,27 @@ export class AuthMiddleware {
     res: Response,
     next: NextFunction
   ): Promise<void> {
+    const cookieToken = req.cookies.token; // if token in cookie ? take token from cookie : else take token from header |
     const { authorization } = req.headers;
-    if (authorization) {
+    if (cookieToken) {
+      try {
+        const result = await this.userTokenService.verifyAccessToken(
+          cookieToken
+        );
+        if (result) {
+          req.hostId = result;
+          next();
+        } else {
+          res.status(401).json({
+            success: false,
+            message: "Unauthorized access",
+          });
+        }
+      } catch (error) {
+        res.status(500);
+        next(error);
+      }
+    } else if (authorization) {
       try {
         const token = authorization.replace("Bearer ", "");
         const result = await this.userTokenService.verifyAccessToken(token);
@@ -62,19 +102,19 @@ export class AuthMiddleware {
           req.userId = result;
           next();
         } else {
-          res.status(403).json({
+          res.status(401).json({
             success: false,
             message: "Unauthorized access",
           });
         }
       } catch (error) {
-        res.status(400);
+        res.status(500);
         next(error);
       }
     } else {
       res.status(401).json({
         success: false,
-        message: "auth header not found",
+        message: "Authorization header not found",
       });
     }
   }

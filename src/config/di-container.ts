@@ -27,6 +27,28 @@ import { FileController } from "../infrastructure/web/v1/controllers/file-contro
 import { FileUploader } from "./multer";
 import { UploadFileUseCase } from "../application/use-cases/storage/upload-file";
 import { S3ObjectStoreService } from "../infrastructure/storage/s3-storage";
+import { OrganizerRoutes } from "../infrastructure/web/v1/routes/organizer-routes";
+import { PrismaOrganizerRepository } from "../infrastructure/database/prisma/repositories/prisma-organizer-repository";
+import { CreateOrganizationUseCase } from "../application/use-cases/organizer/create-organizer";
+import { OrganizerController } from "../infrastructure/web/v1/controllers/organizer-controller";
+import { UpdateHostUseCase } from "../application/use-cases/host/update-host";
+import { AuthByGoogleUseCase } from "../application/use-cases/auth/common/auth-by-google";
+import { GoogleAuthService } from "../infrastructure/services/google/google-auth-service";
+import { OAuth2Client } from "google-auth-library";
+import { CategoryRouter } from "../infrastructure/web/v1/routes/category-routes";
+import { PrismaCategoryRepository } from "../infrastructure/database/prisma/repositories/prisma-category-repository";
+import { GetCategoryUseCase } from "../application/use-cases/category/get-category";
+import { CategoryController } from "../infrastructure/web/v1/controllers/category-controller";
+import { PrismaEventRepository } from "../infrastructure/database/prisma/repositories/prisma-event-repository";
+import { PrismaArtistRepository } from "../infrastructure/database/prisma/repositories/prisma-artist-repository";
+import { PrismaEventGalleryRepository } from "../infrastructure/database/prisma/repositories/prisma-event-gallery-repository";
+import { GetEventUseCase } from "../application/use-cases/event/get-event";
+import { GetArtistUseCase } from "../application/use-cases/artist/get-artist";
+import { GetEventGalleryUseCase } from "../application/use-cases/gallery/get-gallery";
+import { EventController } from "../infrastructure/web/v1/controllers/event-controller";
+import { EventGalleryController } from "../infrastructure/web/v1/controllers/event-gallery-controller";
+import { ArtistController } from "../infrastructure/web/v1/controllers/artist-controller";
+import { EventRouter } from "../infrastructure/web/v1/routes/event-routes";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -34,15 +56,24 @@ export class DiContainer {
   private authRoutes: AuthRouter;
   private hostRoutes: HostRouter;
   private fileRoutes: FileRouter;
+  private organizerRoutes: OrganizerRoutes;
+  private categoryRoutes: CategoryRouter;
+  private eventRoutes: EventRouter;
 
   private constructor() {
     const prisma = new PrismaClient();
+    const oauth2Client = new OAuth2Client();
 
     // Prisma Repositories
     const userRepository = new PrismaUserRepository(prisma);
     const hostRepository = new PrismaHostRepository(prisma);
     const hostTokenRepository = new PrismaHostTokenRepository(prisma);
     const userTokenRepository = new PrismaUserTokenRepository(prisma);
+    const organizerRepository = new PrismaOrganizerRepository(prisma);
+    const categoryRepository = new PrismaCategoryRepository(prisma);
+    const eventRepository = new PrismaEventRepository(prisma);
+    const artistRepository = new PrismaArtistRepository(prisma);
+    const eventGalleryRepository = new PrismaEventGalleryRepository(prisma);
 
     // Service repository
     const userTokenServiceRepository = new UserTokenService(
@@ -51,9 +82,10 @@ export class DiContainer {
     const hostTokenServiceRepository = new HostTokenService(
       hostTokenRepository
     );
+    const oauthRepository = new GoogleAuthService(oauth2Client);
 
-    // Storage repository 
-    const storageRepository = new S3ObjectStoreService()
+    // Storage repository
+    const storageRepository = new S3ObjectStoreService();
 
     // Use cases
     const createUserUseCase = new CreateUserUseCase(userRepository);
@@ -71,6 +103,17 @@ export class DiContainer {
       hostTokenServiceRepository
     );
     const fileUploadUseCase = new UploadFileUseCase(storageRepository);
+    const createOrganizerUseCase = new CreateOrganizationUseCase(
+      organizerRepository
+    );
+    const updateHostUseCase = new UpdateHostUseCase(hostRepository);
+    const authByGoogleUseCase = new AuthByGoogleUseCase(oauthRepository);
+    const getCategoryUseCase = new GetCategoryUseCase(categoryRepository);
+    const getEventUseCase = new GetEventUseCase(eventRepository);
+    const getArtistUseCase = new GetArtistUseCase(artistRepository);
+    const getEventGalleryUseCase = new GetEventGalleryUseCase(
+      eventGalleryRepository
+    );
 
     // Controllers
     const userController = new UserController(
@@ -86,7 +129,8 @@ export class DiContainer {
       getHostUseCase,
       hostLoginUseCase,
       hostLogoutUseCase,
-      hostRefreshTokenUseCase
+      hostRefreshTokenUseCase,
+      authByGoogleUseCase
     );
     const hostController = new HostController(
       createHostUseCase,
@@ -94,6 +138,16 @@ export class DiContainer {
       getHostUseCase
     );
     const fileController = new FileController(fileUploadUseCase);
+    const organizerController = new OrganizerController(
+      createOrganizerUseCase,
+      updateHostUseCase
+    );
+    const categoryController = new CategoryController(getCategoryUseCase);
+    const eventController = new EventController(getEventUseCase);
+    const eventGalleryController = new EventGalleryController(
+      getEventGalleryUseCase
+    );
+    const artistController = new ArtistController(getArtistUseCase);
 
     // Middleware
     const authMiddleware = new AuthMiddleware(
@@ -110,6 +164,17 @@ export class DiContainer {
       authMiddleware,
       fileController,
       fileUploader
+    );
+    this.organizerRoutes = new OrganizerRoutes(
+      organizerController,
+      authMiddleware
+    );
+    this.categoryRoutes = new CategoryRouter(categoryController);
+    this.eventRoutes = new EventRouter(
+      eventController,
+      artistController,
+      eventGalleryController,
+      authMiddleware
     );
   }
 
@@ -134,5 +199,17 @@ export class DiContainer {
 
   public getFileRoutes(): FileRouter {
     return this.fileRoutes;
+  }
+
+  public getOrganizerRoutes(): OrganizerRoutes {
+    return this.organizerRoutes;
+  }
+
+  public getCategoryRoutes(): CategoryRouter {
+    return this.categoryRoutes;
+  }
+
+  public getEventRoutes(): EventRouter{
+    return this.eventRoutes;
   }
 }

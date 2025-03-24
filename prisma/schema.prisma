@@ -13,16 +13,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EventType {
+  public
+  private
+  inviteOnly
+}
+
+enum EventStatus {
+  draft
+  published
+  cancelled
+}
+
+enum EventMode {
+  online
+  offline
+}
+
 model User {
   id            Int             @id  @default(autoincrement())
   firstName     String
   lastName      String?
   email         String          @unique
-  phone         String          @unique
+  phone         String?         @unique
   profile       String?
   password      String
   isDeleted     Boolean         @default(false)
   deletedDate   DateTime?
+  isVerified    Boolean         @default(false)
   createAt      DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   refreshTokens RefreshToken[]
@@ -42,17 +60,18 @@ model Host {
   firstName     String
   lastName      String?
   email         String          @unique
-  phone         String          @unique
+  phone         String?         @unique
   profile       String?
   org_id        Int?
   role          String          @default("admin")
   isDeleted     Boolean         @default(false)
   deletedDate   DateTime?
   password      String
+  isVerified    Boolean         @default(false)
   updatedAt     DateTime        @updatedAt
   createdAt     DateTime        @default(now())
   refreshTokens RefreshTokenHost[]
-  organizer Organizer? @relation(fields: [org_id], references: [id])
+  organizer     Organizer?      @relation(fields: [org_id], references: [id])
 }
 
 model RefreshTokenHost {
@@ -75,6 +94,88 @@ model Organizer {
   instagram     String?
   twitter       String?
   hosts         Host[]
+  events        Event[]
   updatedAt     DateTime        @updatedAt
   createdAt     DateTime        @default(now())
+}
+
+model Event {
+  id               Int            @id @default(autoincrement())
+  orgId            Int
+  name             String
+  shortDescription String
+  startDate        DateTime
+  endDate          DateTime
+  type             EventType      @default(public)
+  status           EventStatus    @default(draft)
+  mode             EventMode      @default(offline)
+  categoryId       Int
+  description      String
+  location         String
+  address          String
+  meetLink         String?
+  artists          Artist[]
+  tickets          Ticket[]
+  coverPhoto       String
+  featured         Boolean         @default(false)
+  eventImages      EventGallery[]
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+  organizer        Organizer       @relation(fields: [orgId], references: [id])
+  category         Category        @relation(fields: [categoryId], references: [id])
+}
+
+model Artist {
+  id               Int             @id @default(autoincrement())
+  name             String
+  eventId          Int
+  tag              String
+  profile          String?
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+  event            Event           @relation(fields: [eventId], references: [id])
+}
+
+model Ticket {
+  id               Int             @id @default(autoincrement())
+  eventId          Int
+  name             String
+  price            Float
+  isLimited        Boolean         @default(true)
+  totalSeat        Int?
+  salesStartDate   DateTime
+  salesEndDate     DateTime
+  message          String
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+  event            Event           @relation(fields: [eventId], references: [id])
+}
+
+model Category {
+  id               Int @id @default(autoincrement())
+  name             String
+  events           Event[]
+  subCategory      SubCategory[]
+  iconUrl          String
+  color            String
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+}
+
+model SubCategory {
+  id               Int             @id @default(autoincrement())
+  name             String
+  categoryId       Int
+  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+  category         Category        @relation(fields: [categoryId], references: [id])
+}
+
+model EventGallery {
+  id              Int              @id @default(autoincrement())
+  eventId         Int
+  imageUrl        String
+  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime         @default(now())
+  event           Event            @relation(fields: [eventId], references: [id])
 }

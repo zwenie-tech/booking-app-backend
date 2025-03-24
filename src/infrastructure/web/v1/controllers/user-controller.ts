@@ -39,16 +39,22 @@ export class UserController {
           if (user) {
             try {
               const token = await this.userLoginUseCase.execute(user.id);
+              res.cookie("token", token?.accessToken, {
+                httpOnly: true,
+                secure: true,
+                maxAge: 7 * 60 * 1000,
+              });
               res.status(201).json({
                 success: true,
                 data: {
                   userId: user.id,
+                  isVerified: user.isVerified,
                   accessToken: token?.accessToken,
                   refreshToken: token?.refreshToken,
                 },
               });
             } catch (err) {
-              res.status(301);
+              res.status(500);
               next(err);
             }
           } else {
@@ -58,7 +64,7 @@ export class UserController {
             });
           }
         } catch (error: any) {
-          res.status(400);
+          res.status(503);
           next(error);
         }
     } else {
@@ -76,28 +82,29 @@ export class UserController {
     res: AppResponse,
     next: NextFunction
   ): Promise<void> {
-    try{
+    try {
       const user = await this.getUserUseCase.execute(res.userId!);
-      if(user) {
+      if (user) {
         res.status(200).json({
-          success : true,
+          success: true,
           data: {
             userId: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
             phone: user.phone,
-            profile: user.profile
-          }
-        })
-      }else {
-        res.status(402).json({
+            profile: user.profile,
+            isVerified: user.isVerified,
+          },
+        });
+      } else {
+        res.status(404).json({
           success: false,
-          message: "User not found with id"
-        })
+          message: "User not found with id",
+        });
       }
-    }catch(error) {
-      res.status(403);
+    } catch (error) {
+      res.status(503);
       next(error);
     }
   }

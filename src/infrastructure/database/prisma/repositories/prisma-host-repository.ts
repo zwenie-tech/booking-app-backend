@@ -31,10 +31,11 @@ export class PrismaHostRepository implements HostRepository {
         result.firstName,
         result.lastName,
         result.email,
-        result.phone,
+        result.phone!,
         result.profile,
         result.org_id!,
         result.role,
+        result.isVerified,
         result.isDeleted,
         result.deletedDate,
         result.password,
@@ -56,10 +57,11 @@ export class PrismaHostRepository implements HostRepository {
         result.firstName,
         result.lastName,
         result.email,
-        result.phone,
+        result.phone!,
         result.profile,
         result.org_id!,
         result.role,
+        result.isVerified,
         result.isDeleted,
         result.deletedDate,
         result.password,
@@ -79,6 +81,7 @@ export class PrismaHostRepository implements HostRepository {
       "https://example.com/profiles/alice.jpg",
       1,
       "",
+      false,
       false,
       null,
       "",
@@ -106,10 +109,11 @@ export class PrismaHostRepository implements HostRepository {
           result.firstName,
           result.lastName,
           result.email,
-          result.phone,
+          result.phone!,
           result.profile,
           result.org_id!,
           result.role,
+          result.isVerified,
           result.isDeleted,
           result.deletedDate,
           result.password,
@@ -138,10 +142,11 @@ export class PrismaHostRepository implements HostRepository {
         result.firstName,
         result.lastName,
         result.email,
-        result.phone,
+        result.phone!,
         result.profile,
         result.org_id!,
         result.role,
+        result.isVerified,
         result.isDeleted,
         result.deletedDate,
         result.password,
@@ -149,6 +154,36 @@ export class PrismaHostRepository implements HostRepository {
       );
     } else {
       return result;
+    }
+  }
+
+  async updateOrgById(orgId: number, hostId: number): Promise<Host | null> {
+    const host = await this.prisma.host.update({
+      where: {
+        id: hostId,
+      },
+      data: {
+        org_id: orgId,
+      },
+    });
+    if (host) {
+      return new Host(
+        host.id,
+        host.firstName,
+        host.lastName,
+        host.email,
+        host.phone!,
+        host.profile,
+        host.org_id!,
+        host.role,
+        host.isVerified,
+        host.isDeleted,
+        host.deletedDate,
+        host.password,
+        host.createdAt
+      );
+    } else {
+      return null;
     }
   }
 }
