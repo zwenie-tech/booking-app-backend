@@ -39,6 +39,16 @@ import { CategoryRouter } from "../infrastructure/web/v1/routes/category-routes"
 import { PrismaCategoryRepository } from "../infrastructure/database/prisma/repositories/prisma-category-repository";
 import { GetCategoryUseCase } from "../application/use-cases/category/get-category";
 import { CategoryController } from "../infrastructure/web/v1/controllers/category-controller";
+import { PrismaEventRepository } from "../infrastructure/database/prisma/repositories/prisma-event-repository";
+import { PrismaArtistRepository } from "../infrastructure/database/prisma/repositories/prisma-artist-repository";
+import { PrismaEventGalleryRepository } from "../infrastructure/database/prisma/repositories/prisma-event-gallery-repository";
+import { GetEventUseCase } from "../application/use-cases/event/get-event";
+import { GetArtistUseCase } from "../application/use-cases/artist/get-artist";
+import { GetEventGalleryUseCase } from "../application/use-cases/gallery/get-gallery";
+import { EventController } from "../infrastructure/web/v1/controllers/event-controller";
+import { EventGalleryController } from "../infrastructure/web/v1/controllers/event-gallery-controller";
+import { ArtistController } from "../infrastructure/web/v1/controllers/artist-controller";
+import { EventRouter } from "../infrastructure/web/v1/routes/event-routes";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -48,6 +58,7 @@ export class DiContainer {
   private fileRoutes: FileRouter;
   private organizerRoutes: OrganizerRoutes;
   private categoryRoutes: CategoryRouter;
+  private eventRoutes: EventRouter;
 
   private constructor() {
     const prisma = new PrismaClient();
@@ -60,6 +71,9 @@ export class DiContainer {
     const userTokenRepository = new PrismaUserTokenRepository(prisma);
     const organizerRepository = new PrismaOrganizerRepository(prisma);
     const categoryRepository = new PrismaCategoryRepository(prisma);
+    const eventRepository = new PrismaEventRepository(prisma);
+    const artistRepository = new PrismaArtistRepository(prisma);
+    const eventGalleryRepository = new PrismaEventGalleryRepository(prisma);
 
     // Service repository
     const userTokenServiceRepository = new UserTokenService(
@@ -95,6 +109,11 @@ export class DiContainer {
     const updateHostUseCase = new UpdateHostUseCase(hostRepository);
     const authByGoogleUseCase = new AuthByGoogleUseCase(oauthRepository);
     const getCategoryUseCase = new GetCategoryUseCase(categoryRepository);
+    const getEventUseCase = new GetEventUseCase(eventRepository);
+    const getArtistUseCase = new GetArtistUseCase(artistRepository);
+    const getEventGalleryUseCase = new GetEventGalleryUseCase(
+      eventGalleryRepository
+    );
 
     // Controllers
     const userController = new UserController(
@@ -124,6 +143,11 @@ export class DiContainer {
       updateHostUseCase
     );
     const categoryController = new CategoryController(getCategoryUseCase);
+    const eventController = new EventController(getEventUseCase);
+    const eventGalleryController = new EventGalleryController(
+      getEventGalleryUseCase
+    );
+    const artistController = new ArtistController(getArtistUseCase);
 
     // Middleware
     const authMiddleware = new AuthMiddleware(
@@ -146,6 +170,12 @@ export class DiContainer {
       authMiddleware
     );
     this.categoryRoutes = new CategoryRouter(categoryController);
+    this.eventRoutes = new EventRouter(
+      eventController,
+      artistController,
+      eventGalleryController,
+      authMiddleware
+    );
   }
 
   public static getInstance(): DiContainer {
@@ -177,5 +207,9 @@ export class DiContainer {
 
   public getCategoryRoutes(): CategoryRouter {
     return this.categoryRoutes;
+  }
+
+  public getEventRoutes(): EventRouter{
+    return this.eventRoutes;
   }
 }

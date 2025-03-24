@@ -110,7 +110,6 @@ model Event {
   status           EventStatus    @default(draft)
   mode             EventMode      @default(offline)
   categoryId       Int
-  subCategory      String?
   description      String
   location         String
   address          String
@@ -118,6 +117,7 @@ model Event {
   artists          Artist[]
   tickets          Ticket[]
   coverPhoto       String
+  featured         Boolean         @default(false)
   eventImages      EventGallery[]
   updatedAt        DateTime        @updatedAt
   createdAt        DateTime        @default(now())

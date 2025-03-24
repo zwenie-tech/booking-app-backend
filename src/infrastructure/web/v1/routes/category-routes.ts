@@ -9,7 +9,7 @@ export class CategoryRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get("/category", (req, res, next) =>
+    this.router.get("/", (req, res, next) =>
       this.categoryController.getCategory(req, res, next)
     );
   }
