@@ -17,7 +17,7 @@ export class UserTokenService implements UserTokenServiceRepository {
         ? process.env.ACCESS_TOKEN_EXPIRES!
         : process.env.REFRESH_TOKEN_EXPIRES!;
 
-    return jwt.sign({ userId }, secret, { expiresIn });
+    return jwt.sign({ exp: expiresIn, userId }, secret);
   }
 
   async generateAccessToken(userId: number): Promise<string> {

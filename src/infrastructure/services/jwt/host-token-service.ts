@@ -21,33 +21,26 @@ export class HostTokenService implements HostTokenServiceRepository {
         ? process.env.ACCESS_TOKEN_EXPIRES!
         : process.env.REFRESH_TOKEN_EXPIRES!;
 
-    return jwt.sign({ userId, orgId }, secret, { expiresIn });
+    return jwt.sign({ exp: expiresIn, userId, orgId }, secret);
   }
 
   async generateAccessToken(hostId: number, orgId: number): Promise<string> {
     return this.generateToken(hostId, orgId, "access");
   }
 
-  async generateRefreshToken(
-    hostId: number,
-    orgId: number
-  ): Promise<string> {
+  async generateRefreshToken(hostId: number, orgId: number): Promise<string> {
     // const decoded = await this.verifyRefreshToken(hostToken.token); // can i use this before this stage? or change something else?
-    const token = this.generateToken(hostId,orgId, "refresh");
+    const token = this.generateToken(hostId, orgId, "refresh");
     const result = await this.tokenRepository.storeRefreshToken(
-      new HostToken(
-        0,
-        hostId,
-        token,
-        new Date(),
-        new Date()
-      )
+      new HostToken(0, hostId, token, new Date(), new Date())
     );
 
     return result.token;
   }
 
-  async verifyAccessToken(token: string): Promise<{ userId: number; orgId: number; } | null> {
+  async verifyAccessToken(
+    token: string
+  ): Promise<{ userId: number; orgId: number } | null> {
     try {
       const decoded = jwt.verify(
         token,
@@ -62,7 +55,9 @@ export class HostTokenService implements HostTokenServiceRepository {
     }
   }
 
-  async verifyRefreshToken(token: string): Promise<{ userId: number; orgId: number; } | null> {
+  async verifyRefreshToken(
+    token: string
+  ): Promise<{ userId: number; orgId: number } | null> {
     try {
       const decoded = jwt.verify(
         token,
