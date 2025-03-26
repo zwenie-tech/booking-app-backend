@@ -15,7 +15,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "20"
-
+          
+      - name: Clear Cache
+        run: rm -rf node_modules && rm -rf .next && rm -rf dist
+        
       - name: Install Dependencies
         run: npm install
 

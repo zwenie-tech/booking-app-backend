@@ -54,3 +54,6 @@ yarn.lock
 
 # Typescript
 *.tsbuildinfo
+
+#apple 
+.DS_Store
