@@ -11,13 +11,29 @@ export class UserTokenService implements UserTokenServiceRepository {
       type === "access"
         ? process.env.ACCESS_TOKEN_SECRET!
         : process.env.REFRESH_TOKEN_SECRET!;
-
+  
     const expiresIn =
       type === "access"
-        ? process.env.ACCESS_TOKEN_EXPIRES!
-        : process.env.REFRESH_TOKEN_EXPIRES!;
-
-    return jwt.sign({ exp: expiresIn, userId }, secret);
+        ? process.env.ACCESS_TOKEN_EXPIRES! // "15m"
+        : process.env.REFRESH_TOKEN_EXPIRES!; // "7d"
+  
+    // Calculate expiration time in seconds
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    let expiresInSeconds: number;
+  
+    if (expiresIn.endsWith("m")) {
+      expiresInSeconds = parseInt(expiresIn) * 60; // minutes to seconds
+    } else if (expiresIn.endsWith("h")) {
+      expiresInSeconds = parseInt(expiresIn) * 60 * 60; // hours to seconds
+    } else if (expiresIn.endsWith("d")) {
+      expiresInSeconds = parseInt(expiresIn) * 60 * 60 * 24; // days to seconds
+    } else {
+      throw new Error("Invalid expiresIn format. Use 'm', 'h', or 'd'.");
+    }
+  
+    const exp = nowInSeconds + expiresInSeconds;
+  
+    return jwt.sign({ exp, userId }, secret);
   }
 
   async generateAccessToken(userId: number): Promise<string> {
