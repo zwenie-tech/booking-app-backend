@@ -21,7 +21,24 @@ export class HostTokenService implements HostTokenServiceRepository {
         ? process.env.ACCESS_TOKEN_EXPIRES!
         : process.env.REFRESH_TOKEN_EXPIRES!;
 
-    return jwt.sign({ exp: expiresIn, userId, orgId }, secret);
+        // Calculate expiration time in seconds
+        const nowInSeconds = Math.floor(Date.now() / 1000);
+        let expiresInSeconds: number;
+      
+        if (expiresIn.endsWith("m")) {
+          expiresInSeconds = parseInt(expiresIn) * 60; // minutes to seconds
+        } else if (expiresIn.endsWith("h")) {
+          expiresInSeconds = parseInt(expiresIn) * 60 * 60; // hours to seconds
+        } else if (expiresIn.endsWith("d")) {
+          expiresInSeconds = parseInt(expiresIn) * 60 * 60 * 24; // days to seconds
+        } else {
+          throw new Error("Invalid expiresIn format. Use 'm', 'h', or 'd'.");
+        }
+      
+        const exp = nowInSeconds + expiresInSeconds;
+      
+      return jwt.sign({ exp, userId, orgId }, secret);
+    // return jwt.sign({ exp: expiresIn, userId, orgId }, secret);np
   }
 
   async generateAccessToken(hostId: number, orgId: number): Promise<string> {
