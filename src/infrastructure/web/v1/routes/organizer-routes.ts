@@ -12,7 +12,7 @@ export class OrganizerRoutes {
     this.initializeRoutes();
   }
   private initializeRoutes(): void {
-    this.router.post("/register",this.authMiddleware.hostAuth, (req, res, next) =>
+    this.router.post("/register", (req, res, next) =>
       this.organizerController.createOrganizer(req, res, next)
     );
   }
