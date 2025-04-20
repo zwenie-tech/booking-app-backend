@@ -42,6 +42,12 @@ export class EventRouter {
       (req, res, next) =>
         this.eventGalleryController.getEventGalleryByEventId(req, res, next)
     );
+    this.router.post(
+      "/create",
+      this.authMiddleware.hostAuth,
+      (req, res, next) =>
+        this.eventController.createEvent(req, res, next)
+    );
   }
 
   public getRouter(): Router {
