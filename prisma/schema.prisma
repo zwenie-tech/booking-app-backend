@@ -106,9 +106,9 @@ model Event {
   shortDescription String
   startDate        DateTime
   endDate          DateTime
-  type             EventType      @default(public)
-  status           EventStatus    @default(draft)
-  mode             EventMode      @default(offline)
+  type             Int
+  status           Int            @default(1)
+  mode             Int      
   categoryId       Int
   description      String
   location         String

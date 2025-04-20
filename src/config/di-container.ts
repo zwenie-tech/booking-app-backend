@@ -49,6 +49,7 @@ import { EventController } from "../infrastructure/web/v1/controllers/event-cont
 import { EventGalleryController } from "../infrastructure/web/v1/controllers/event-gallery-controller";
 import { ArtistController } from "../infrastructure/web/v1/controllers/artist-controller";
 import { EventRouter } from "../infrastructure/web/v1/routes/event-routes";
+import { CreateEventUseCase } from "../application/use-cases/event/create-event";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -110,6 +111,7 @@ export class DiContainer {
     const authByGoogleUseCase = new AuthByGoogleUseCase(oauthRepository);
     const getCategoryUseCase = new GetCategoryUseCase(categoryRepository);
     const getEventUseCase = new GetEventUseCase(eventRepository);
+    const createEventUseCase = new CreateEventUseCase(eventRepository);
     const getArtistUseCase = new GetArtistUseCase(artistRepository);
     const getEventGalleryUseCase = new GetEventGalleryUseCase(
       eventGalleryRepository
@@ -143,7 +145,7 @@ export class DiContainer {
       updateHostUseCase
     );
     const categoryController = new CategoryController(getCategoryUseCase);
-    const eventController = new EventController(getEventUseCase);
+    const eventController = new EventController(getEventUseCase, createEventUseCase);
     const eventGalleryController = new EventGalleryController(
       getEventGalleryUseCase
     );

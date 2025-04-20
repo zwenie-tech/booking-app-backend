@@ -5,4 +5,5 @@ export interface EventRepository {
   findAll(): Promise<Event[] | null>;
   featuredEvents(): Promise<Event[] | null>;
   getEventById(id: number): Promise<Event | null>;
+  create(event: Event): Promise<Event | null>;
 }
