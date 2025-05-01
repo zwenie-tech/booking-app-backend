@@ -13,23 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum EventType {
-  public
-  private
-  inviteOnly
-}
-
-enum EventStatus {
-  draft
-  published
-  cancelled
-}
-
-enum EventMode {
-  online
-  offline
-}
-
 model User {
   id            Int             @id  @default(autoincrement())
   firstName     String
@@ -178,4 +161,19 @@ model EventGallery {
   updatedAt       DateTime         @updatedAt
   createdAt       DateTime         @default(now())
   event           Event            @relation(fields: [eventId], references: [id])
+}
+
+model EventType {
+  id               Int @id @default(autoincrement())
+  name             String
+}
+
+model EventStatus {
+  id               Int @id @default(autoincrement())
+  name             String
+}
+
+model EventMode {
+  id               Int @id @default(autoincrement())
+  name             String
 }

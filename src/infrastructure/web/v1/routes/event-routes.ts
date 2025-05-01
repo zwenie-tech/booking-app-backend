@@ -48,6 +48,15 @@ export class EventRouter {
       (req, res, next) =>
         this.eventController.createEvent(req, res, next)
     );
+    this.router.get("/eventType", (req, res, next) =>
+      this.eventController.getEventType(req, res, next)
+    );    
+    this.router.get("/eventStatus", (req, res, next) =>
+      this.eventController.getEventStatus(req, res, next)
+    );
+    this.router.get("/eventMode", (req, res, next) =>
+      this.eventController.getEventMode(req, res, next)
+    );
   }
 
   public getRouter(): Router {

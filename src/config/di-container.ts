@@ -50,6 +50,13 @@ import { EventGalleryController } from "../infrastructure/web/v1/controllers/eve
 import { ArtistController } from "../infrastructure/web/v1/controllers/artist-controller";
 import { EventRouter } from "../infrastructure/web/v1/routes/event-routes";
 import { CreateEventUseCase } from "../application/use-cases/event/create-event";
+import { GetEventTypeUseCase } from "../application/use-cases/event/get-event-type";
+import { EventTypeRepository } from '../domain/repositories/event-type-repository.interface';
+import { PrismaEventTypeRepository } from "../infrastructure/database/prisma/repositories/prisma-event-type-repository";
+import { PrismaEventStatusRepository } from '../infrastructure/database/prisma/repositories/prisma-event-status-repository';
+import { GetEventStatusUseCase } from "../application/use-cases/event/get-event-status";
+import { GetEventModeUseCase } from "../application/use-cases/event/get-event-mode";
+import { PrismaEventModeRepository } from "../infrastructure/database/prisma/repositories/prisma-event-mode-repository";
 
 export class DiContainer {
   private static instance: DiContainer;
@@ -75,6 +82,9 @@ export class DiContainer {
     const eventRepository = new PrismaEventRepository(prisma);
     const artistRepository = new PrismaArtistRepository(prisma);
     const eventGalleryRepository = new PrismaEventGalleryRepository(prisma);
+    const eventTypeRepository = new PrismaEventTypeRepository(prisma);
+    const eventStatusRepository = new PrismaEventStatusRepository(prisma);
+    const eventModeRepository =  new PrismaEventModeRepository(prisma);
 
     // Service repository
     const userTokenServiceRepository = new UserTokenService(
@@ -112,6 +122,9 @@ export class DiContainer {
     const getCategoryUseCase = new GetCategoryUseCase(categoryRepository);
     const getEventUseCase = new GetEventUseCase(eventRepository);
     const createEventUseCase = new CreateEventUseCase(eventRepository);
+    const getEventType = new GetEventTypeUseCase(eventTypeRepository);
+    const getEventStatus = new GetEventStatusUseCase(eventStatusRepository);
+    const getEventMode = new GetEventModeUseCase(eventModeRepository);
     const getArtistUseCase = new GetArtistUseCase(artistRepository);
     const getEventGalleryUseCase = new GetEventGalleryUseCase(
       eventGalleryRepository
@@ -145,7 +158,7 @@ export class DiContainer {
       updateHostUseCase
     );
     const categoryController = new CategoryController(getCategoryUseCase);
-    const eventController = new EventController(getEventUseCase, createEventUseCase);
+    const eventController = new EventController(getEventUseCase, createEventUseCase, getEventType, getEventStatus, getEventMode);
     const eventGalleryController = new EventGalleryController(
       getEventGalleryUseCase
     );

@@ -4,9 +4,14 @@ import { AppRequest } from "../../../../shared/types";
 import { CreateEventValidate } from "../../../validators/event-schema";
 import { CreateEventUseCase } from "../../../../application/use-cases/event/create-event";
 import { util } from "../../../../shared/utils/common";
+import { GetEventTypeUseCase } from "../../../../application/use-cases/event/get-event-type";
+import { GetEventStatusUseCase } from "../../../../application/use-cases/event/get-event-status";
+import { GetEventModeUseCase } from "../../../../application/use-cases/event/get-event-mode";
 
 export class EventController {
-  constructor(private getEventUseCase: GetEventUseCase, private createEventUseCase: CreateEventUseCase) {}
+  constructor(private getEventUseCase: GetEventUseCase, private createEventUseCase: CreateEventUseCase, private getEventTypeUseCase: GetEventTypeUseCase,
+    private getEventStatusUseCase: GetEventStatusUseCase, private getEventModeUseCase: GetEventModeUseCase
+  ) {}
   async getEvents(
     req: Request,
     res: Response,
@@ -132,6 +137,78 @@ export class EventController {
         message: "Validation failed",
         errors: formattedErrors,
       });
+    }
+  }
+
+  async getEventType(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const events = await this.getEventTypeUseCase.getEventType();
+      if (events) {
+        res.status(200).json({
+          success: true,
+          events,
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "Events not found.",
+        });
+      }
+    } catch (error) {
+      res.status(403);
+      next(error);
+    }
+  }
+
+  async getEventStatus(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const eventStatus = await this.getEventStatusUseCase.getEventStatus();
+      if (eventStatus) {
+        res.status(200).json({
+          success: true,
+          eventStatus,
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "Events not found.",
+        });
+      }
+    } catch (error) {
+      res.status(403);
+      next(error);
+    }
+  }
+
+  async getEventMode(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const eventMode = await this.getEventModeUseCase.getEventMode();
+      if (eventMode) {
+        res.status(200).json({
+          success: true,
+          eventMode,
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "Events not found.",
+        });
+      }
+    } catch (error) {
+      res.status(403);
+      next(error);
     }
   }
 }

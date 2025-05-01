@@ -1,3 +1,4 @@
+
 export class Event {
   constructor(
     public readonly id: number,
@@ -20,3 +21,26 @@ export class Event {
     public readonly createdAt: Date
   ) {}
 }
+
+
+export class EventType{
+  constructor(
+    public readonly id: number,
+    public readonly eventTypeName: string,
+  ) {}
+}
+
+export class EventStatus{
+  constructor(
+    public readonly id: number,
+    public readonly eventStatusName: string,
+  ) {}
+}
+
+export class EventMode{
+  constructor(
+    public readonly id: number,
+    public readonly eventModeName: string,
+  ) {}
+}
+
